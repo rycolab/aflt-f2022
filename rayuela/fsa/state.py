@@ -35,3 +35,23 @@ class State:
 
 	def __eq__(self, other):
 		return isinstance(other, State) and self.idx == other.idx
+
+
+class PairState(State):
+
+	def __init__(self, p, q):
+		super().__init__((p, q))
+
+	@property
+	def state1(self):
+		return self.idx[0]
+
+	@property
+	def state2(self):
+		return self.idx[1]
+
+	def __repr__(self):
+		return f"( {str(self.state1)}, {str(self.state2)} )"
+
+	def __str__(self):
+		return self.__repr__()

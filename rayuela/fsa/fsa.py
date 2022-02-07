@@ -159,7 +159,7 @@ class FSA:
 		return F
 
 	@property
-	def deterministic(self):
+	def deterministic(self) -> bool:
 
 		# Homework 1: Question 2
 		raise NotImplementedError
@@ -171,7 +171,7 @@ class FSA:
 		raise NotImplementedError
 
 	def reverse(self) -> FSA:
-		""" computes the set of co-acessible states """
+		""" computes the reverse of the FSA """
 
 		# Homework 1: Question 3
 		raise NotImplementedError
