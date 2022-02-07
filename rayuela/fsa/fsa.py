@@ -11,7 +11,7 @@ from rayuela.base.semiring import Boolean
 from rayuela.base.misc import epsilon_filter
 from rayuela.base.symbol import Sym, ε, ε_l
 
-from rayuela.fsa.state import State
+from rayuela.fsa.state import State, PairState
 from rayuela.fsa.pathsum import Pathsum, Strategy
 
 class FSA:
@@ -136,11 +136,6 @@ class FSA:
 	def num_states(self):
 		return len(self.Q)
 
-	@property
-	def acyclic(self):
-		cyclic, _ = self.dfs()
-		return not cyclic
-
 	def copy(self):
 		""" deep copies the machine """
 		return copy.deepcopy(self)
@@ -157,6 +152,62 @@ class FSA:
 				F.set_F(q, w)
 
 		return F
+
+	def dfs(self):
+		""" Depth-first search (Cormen et al. 2019; Section 22.3) """
+
+		in_progress, finished = set([]), {}
+		cyclic, counter = False, 0
+
+		def _dfs(p):
+			nonlocal in_progress
+			nonlocal finished
+			nonlocal cyclic
+			nonlocal counter
+
+			in_progress.add(p)
+
+			for (_, q), _ in self.arcs(p):
+				if q in in_progress:
+					cyclic = True
+				elif q not in finished:
+					_dfs(q)
+
+			in_progress.remove(p)
+			finished[p] = counter
+			counter += 1
+
+		for q, _ in self.I: _dfs(q)
+
+		return cyclic, finished
+
+	def finish(self, rev=False, acyclic_check=False):
+		"""
+		Returns the nodes in order of their finishing time.
+		"""
+
+		cyclic, finished = self.dfs()
+
+		if acyclic_check:
+			assert self.acyclic
+
+		sort = {}
+		for s, n in finished.items():
+			sort[n] = s
+		if rev:
+			for n in sorted(list(sort.keys())):
+				yield sort[n]
+		else:
+			for n in reversed(sorted(list(sort.keys()))):
+				yield sort[n]
+
+	def toposort(self, rev=False):
+		return self.finish(rev=rev, acyclic_check=True)
+
+	@property
+	def acyclic(self) -> bool:
+		cyclic, _ = self.dfs()
+		return not cyclic
 
 	@property
 	def deterministic(self) -> bool:
