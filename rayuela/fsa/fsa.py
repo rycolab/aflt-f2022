@@ -1,0 +1,534 @@
+from __future__ import annotations
+import copy
+import numpy as np
+from frozendict import frozendict
+from itertools import product
+
+from collections import Counter
+from collections import defaultdict as dd
+
+from rayuela.base.semiring import Boolean
+from rayuela.base.misc import epsilon_filter
+from rayuela.base.symbol import Sym, ε, ε_l
+
+from rayuela.fsa.state import State
+from rayuela.fsa.pathsum import Pathsum, Strategy
+
+class FSA:
+
+	def __init__(self, R=Boolean):
+
+		# DEFINITION
+		# A weighted finite-state automaton is a 5-tuple <R, Σ, Q, δ, λ, ρ> where
+		# • R is a semiring;
+		# • Σ is an alphabet of symbols;
+		# • Q is a finite set of states;
+		# • δ is a finite relation Q × Σ × Q × R;
+		# • λ is an initial weight function;
+		# • ρ is a final weight function.
+
+		# NOTATION CONVENTIONS
+		# • single states (elements of Q) are denoted q
+		# • multiple states not in sequence are denoted, p, q, r, ...
+		# • multiple states in sequence are denoted i, j, k, ...
+		# • symbols (elements of Σ) are denoted lowercase a, b, c, ...
+		# • single weights (elements of R) are denoted w
+		# • multiple weights (elements of R) are denoted u, v, w, ...
+
+		# semiring
+		self.R = R
+
+		# alphabet of symbols
+		self.Sigma = set([])
+
+		# a finite set of states
+		self.Q = set([])
+
+		# transition function : Q × Σ × Q → R
+		self.δ = dd(lambda : dd(lambda : dd(lambda : self.R.zero)))
+
+		# initial weight function
+		self.λ = R.chart()
+
+		# final weight function
+		self.ρ = R.chart()
+
+	def add_state(self, q):
+		self.Q.add(q)
+
+	def add_states(self, Q):
+		for q in Q:
+			self.add_state(q)
+
+	def add_arc(self, i, a, j, w=None):
+		if w is None: w = self.R.one
+
+		if not isinstance(i, State): i = State(i)
+		if not isinstance(j, State): j = State(j)
+		if not isinstance(a, Sym): a = Sym(a)
+		if not isinstance(w, self.R): w = self.R(w)
+
+		self.add_states([i, j])
+		self.Sigma.add(a)
+		self.δ[i][a][j] += w
+
+	def set_I(self, q, w=None):
+		if w is None: w = self.R.one
+		self.add_state(q)
+		self.λ[q] = w
+
+	def set_F(self, q, w=None):
+		if w is None: w = self.R.one
+		self.add_state(q)
+		self.ρ[q] = w
+
+	def add_I(self, q, w):
+		self.add_state(q)
+		self.λ[q] += w
+
+	def add_F(self, q, w):
+		self.add_state(q)
+		self.ρ[q] += w
+
+	def freeze(self):
+		self.Sigma = frozenset(self.Sigma)
+		self.Q = frozenset(self.Q)
+		self.δ = frozendict(self.δ)
+		self.λ = frozendict(self.λ)
+		self.ρ = frozendict(self.ρ)
+
+	@property
+	def I(self):
+		for q, w in self.λ.items():
+			if w != self.R.zero:
+				yield q, w
+
+	@property
+	def F(self):
+		for q, w in self.ρ.items():
+			if w != self.R.zero:
+				yield q, w
+
+	def arcs(self, i, no_eps=False):
+		for a, T in self.δ[i].items():
+			if no_eps and a == ε:
+				continue
+			for j, w in T.items():
+				if w == self.R.zero:
+					continue
+				# TODO: remove nesting. (Relict due to old arc class)
+				yield (a, j), w
+
+	def accept(self, string):
+		""" determines whether a string is in the language """
+		assert isinstance(string, str)
+
+		fsa = FSA(R=self.R)
+		for i, x in enumerate(list(string)):
+			fsa.add_arc(State(i), Sym(x), State(i+1), self.R.one)
+		
+		fsa.set_I(State(0), self.R.one)
+		fsa.add_F(State(len(string)), self.R.one)
+
+		return self.intersect(fsa).pathsum()
+
+	@property
+	def num_states(self):
+		return len(self.Q)
+
+	@property
+	def acyclic(self):
+		cyclic, _ = self.dfs()
+		return not cyclic
+
+	def copy(self):
+		""" deep copies the machine """
+		return copy.deepcopy(self)
+
+	def spawn(self, keep_init=False, keep_final=False):
+		""" returns a new FSA in the same semiring """
+		F = FSA(R=self.R)
+
+		if keep_init:
+			for q, w in self.I:
+				F.set_I(q, w)
+		if keep_final:
+			for q, w in self.F:
+				F.set_F(q, w)
+
+		return F
+
+	@property
+	def deterministic(self):
+
+		# Homework 1: Question 2
+		raise NotImplementedError
+
+	@property
+	def pushed(self) -> bool:
+
+		# Homework 1: Question 2
+		raise NotImplementedError
+
+	def reverse(self) -> FSA:
+		""" computes the set of co-acessible states """
+
+		# Homework 1: Question 3
+		raise NotImplementedError
+
+	def accessible(self) -> set:
+		""" computes the set of acessible states """
+
+		# Homework 1: Question 3
+		raise NotImplementedError
+
+	def coaccessible(self) -> set:
+		""" computes the set of co-acessible states """
+
+		# Homework 1: Question 3
+		raise NotImplementedError
+
+	def trim(self) -> FSA:
+		""" keeps only those states that are both accessible and co-accessible """
+
+		# Homework 1: Question 3
+		raise NotImplementedError
+
+	def union(self, fsa) -> FSA:
+		""" construct the union of the two FSAs """
+
+		# Homework 1: Question 4
+		raise NotImplementedError
+
+	def concatenate(self, fsa) -> FSA:
+		""" construct the concatenation of the two FSAs """
+
+		# Homework 1: Question 4
+		raise NotImplementedError
+
+	def closure(self) -> FSA:
+		""" compute the Kleene closure of the FSA """
+
+		# Homework 1: Question 4
+		raise NotImplementedError
+
+	def pathsum(self, strategy=Strategy.LEHMANN):
+		if self.acyclic:
+			strategy = Strategy.VITERBI
+		pathsum = Pathsum(self)
+		return pathsum.pathsum(strategy)
+
+	def intersect(self, fsa):
+		"""
+		on-the-fly weighted intersection
+		epsilon handling from https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.226.1850
+		"""
+
+		# the two machines need to be in the same semiring
+		assert self.R == fsa.R
+
+		# add initial states
+		product_fsa = FSA(R=self.R)
+		for (q1, w1), (q2, w2) in product(self.I, fsa.I):
+			product_fsa.add_I(PairState(q1, q2), w=w1 * w2)
+
+		visited = set([(list(self.λ.keys())[0], list(fsa.λ.keys())[0], State('0'))])
+		stack = [(list(self.λ.keys())[0], list(fsa.λ.keys())[0], State('0'))]
+
+		self_finals = {q: w for q, w in self.F}
+		fsa_finals = {q: w for q, w in fsa.F}
+
+		added_arcs = set()
+		while stack:
+			q1, q2, q3 = stack.pop()
+
+			E1 = [((a, j), w) for ((a, j), w) in self.arcs(q1)] + \
+                            [((ε_l, q1), self.R.one)]
+			E2 = [((a, j), w) for ((a, j), w) in fsa.arcs(q2)] + \
+                            [((ε_l, q2), self.R.one)]
+
+			M = [(((a1, j1), w1), ((a2, j2), w2))
+				 for ((a1, j1), w1), ((a2, j2), w2) in product(E1, E2)
+				 if epsilon_filter(a1, a2, q3) != State('⊥')]
+
+			for ((a1, j1), w1), ((a2, j2), w2) in M:
+				q3 = epsilon_filter(a1, a2, q3)
+
+				# since this is run multiple times due to epsilon filtering,
+				# we don't want to add the same edge multiple times
+				# (and increase its weight)
+				if (q1, q2, j1, j2, a1, a2) not in added_arcs:
+					product_fsa.add_arc(
+						PairState(q1, q2), a1,
+						PairState(j1, j2), w=w1*w2)
+					added_arcs.add((q1, q2, j1, j2, a1, a2))
+
+				if (j1, j2, q3) not in visited:
+					stack.append((j1, j2, q3))
+					visited.add((j1, j2, q3))
+
+			# final state handling
+			if q1 in self_finals and q2 in fsa_finals:
+				product_fsa.add_F(
+					PairState(q1, q2), w=self_finals[q1] * fsa_finals[q2])
+
+		return product_fsa
+
+	def tikz(self, max_per_row=4):
+
+		tikz_string = []
+		previous_ids, positioning = [], ''
+		rows = {}
+		initial = set([q for q, w in self.I])
+		final = set([q for q, w in self.F])
+
+		for jj, q in enumerate(self.Q):
+			options = 'state'
+
+			if q in initial:
+				options += ', initial'
+			if q in final:
+				options += ', accepting'
+
+			if jj >= max_per_row:
+				positioning = f'below = of {previous_ids[jj - max_per_row]}'
+			elif len(previous_ids) > 0:
+				positioning = f'right = of {previous_ids[-1]}'
+			previous_ids.append(f'q{q.idx}')
+			rows[q] = jj // max_per_row
+
+			tikz_string.append(f'\\node[{options}] (q{q.idx}) [{positioning}] {{ {q.idx} }}; \n')
+
+		tikz_string.append('\\draw')
+
+		seen_pairs, drawn_pairs = set(), set()
+
+		for jj, q in enumerate(self.Q):
+			target_edge_labels = dict()
+			for (a, j), w in self.arcs(q):
+				if j not in target_edge_labels:
+					target_edge_labels[j] = f'{a}/{w}'
+				else:
+					target_edge_labels[j] += f'\\\\{a}/{w}'
+				seen_pairs.add(frozenset([q, j]))
+
+			for ii, (target, label) in enumerate(target_edge_labels.items()):
+
+				edge_options = 'align=left'
+				if q == target:
+					edge_options += ', loop above'
+				elif frozenset([q, target]) not in seen_pairs:
+					edge_options += 'a, bove'
+				elif frozenset([q, target]) not in drawn_pairs:
+					if rows[q] == rows[target]:
+						edge_options += ', bend left, above'
+					else:
+						edge_options += ', bend left, right'
+				else:
+					if rows[q] == rows[target]:
+						edge_options += ', bend left, below'
+					else:
+						edge_options += ', bend left, right'
+				end = '\n'
+				if jj == self.num_states - 1 and ii == len(target_edge_labels) - 1:
+					end = '; \n'
+				tikz_string.append(f'(q{q.idx}) edge[{edge_options}] node{{ {label} }} (q{target.idx}) {end}')
+				drawn_pairs.add(frozenset([q, j]))
+
+		if not len(list(self.arcs(list(self.Q)[-1]))) > 0:
+			tikz_string.append(';')
+
+		return ''.join(tikz_string)
+
+	def __truediv__(self, other):
+		return self.intersect(other)
+
+	def __add__(self, other):
+		return self.concatenate(other)
+
+	def __sub__(self, other):
+		return self.difference(other)
+
+	def __repr__(self):
+		return f'WFSA({self.num_states} states, {self.R})'
+
+	def __str__(self):
+		""" ascii visualize """
+
+		output = []
+		for q, w in self.I:
+			output.append(f"initial state:\t{q.idx}\t{w}")
+		for q, w in self.F:
+			output.append(f"final state:\t{q.idx}\t{w}")
+		for p in self.Q:
+			for (a, q), w in self.arcs(p):
+				output.append(f"{p}\t----{a}/{w}---->\t{q}")
+		return "\n".join(output)
+
+	def _repr_html_(self):
+		"""
+		When returned from a Jupyter cell, this will generate the FST visualization
+		Based on: https://github.com/matthewfl/openfst-wrapper
+		"""
+		from uuid import uuid4
+		import json
+		from collections import defaultdict
+		ret = []
+		if self.num_states == 0:
+			return '<code>Empty FST</code>'
+
+		if self.num_states > 1200:
+			return f'FST too large to draw graphic, use fst.ascii_visualize()<br /><code>FST(num_states={self.num_states})</code>'
+
+		finals = {q for q, _ in self.F}
+		initials = {q for q, _ in self.I}
+
+		# print initial
+		for q, w in self.I:
+			if q in finals:
+				label = f'{str(q)} / [{str(w)} / {str(self.ρ[q])}]'
+				color = 'af8dc3'
+			else:
+				label = f'{str(q)} / {str(w)}'
+				color = '66c2a5'
+
+			ret.append(
+				f'g.setNode("{repr(q)}", {{ label: {json.dumps(label)} , shape: "circle" }});\n')
+
+			ret.append(f'g.node("{repr(q)}").style = "fill: #{color}"; \n')
+
+		# print normalfinal
+		for q in (self.Q - finals) - initials:
+
+			label = str(q)
+
+			ret.append(
+				f'g.setNode("{repr(q)}", {{ label: {json.dumps(label)} , shape: "circle" }});\n')
+			ret.append(f'g.node("{repr(q)}").style = "fill: #8da0cb"; \n')
+
+		# print final
+		for q, w in self.F:
+			# already added
+			if q in initials:
+				continue
+
+			if w == self.R.zero:
+				continue
+			label = f'{str(q)} / {str(w)}'
+
+			ret.append(
+				f'g.setNode("{repr(q)}", {{ label: {json.dumps(label)} , shape: "circle" }});\n')
+			ret.append(f'g.node("{repr(q)}").style = "fill: #fc8d62"; \n')
+
+		for q in self.Q:
+			to = defaultdict(list)
+			for (a, j), w in self.arcs(q):
+				label = f'{str(a)} / {str(w)}'
+				to[j].append(label)
+
+			for dest, values in to.items():
+				if len(values) > 4:
+					values = values[0:3] + ['. . .']
+				label = '\n'.join(values)
+				ret.append(
+					f'g.setEdge("{repr(q)}", "{repr(dest)}", {{ arrowhead: "vee", label: {json.dumps(label)} }});\n')
+
+		# if the machine is too big, do not attempt to make the web browser display it
+		# otherwise it ends up crashing and stuff...
+		if len(ret) > 1200:
+			return f'FST too large to draw graphic, use fst.ascii_visualize()<br /><code>FST(num_states={self.num_states})</code>'
+
+		ret2 = ['''
+		<script>
+		try {
+		require.config({
+		paths: {
+		"d3": "https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3",
+		"dagreD3": "https://cdnjs.cloudflare.com/ajax/libs/dagre-d3/0.6.1/dagre-d3.min"
+		}
+		});
+		} catch {
+		  ["https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.js",
+		   "https://cdnjs.cloudflare.com/ajax/libs/dagre-d3/0.6.1/dagre-d3.min.js"].forEach(function (src) {
+			var tag = document.createElement('script');
+			tag.src = src;
+			document.body.appendChild(tag);
+		  })
+		}
+		try {
+		requirejs(['d3', 'dagreD3'], function() {});
+		} catch (e) {}
+		try {
+		require(['d3', 'dagreD3'], function() {});
+		} catch (e) {}
+		</script>
+		<style>
+		.node rect,
+		.node circle,
+		.node ellipse {
+		stroke: #333;
+		fill: #fff;
+		stroke-width: 1px;
+		}
+
+		.edgePath path {
+		stroke: #333;
+		fill: #333;
+		stroke-width: 1.5px;
+		}
+		</style>
+		''']
+
+		obj = 'fst_' + uuid4().hex
+		ret2.append(
+			f'<center><svg width="850" height="600" id="{obj}"><g/></svg></center>')
+		ret2.append('''
+		<script>
+		(function render_d3() {
+		var d3, dagreD3;
+		try { // requirejs is broken on external domains
+		  d3 = require('d3');
+		  dagreD3 = require('dagreD3');
+		} catch (e) {
+		  // for google colab
+		  if(typeof window.d3 !== "undefined" && typeof window.dagreD3 !== "undefined") {
+			d3 = window.d3;
+			dagreD3 = window.dagreD3;
+		  } else { // not loaded yet, so wait and try again
+			setTimeout(render_d3, 50);
+			return;
+		  }
+		}
+		//alert("loaded");
+		var g = new dagreD3.graphlib.Graph().setGraph({ 'rankdir': 'LR' });
+		''')
+		ret2.append(''.join(ret))
+
+		ret2.append(f'var svg = d3.select("#{obj}"); \n')
+		ret2.append(f'''
+		var inner = svg.select("g");
+
+		// Set up zoom support
+		var zoom = d3.zoom().scaleExtent([0.3, 5]).on("zoom", function() {{
+		inner.attr("transform", d3.event.transform);
+		}});
+		svg.call(zoom);
+
+		// Create the renderer
+		var render = new dagreD3.render();
+
+		// Run the renderer. This is what draws the final graph.
+		render(inner, g);
+
+		// Center the graph
+		var initialScale = 0.75;
+		svg.call(zoom.transform, d3.zoomIdentity.translate(
+		    (svg.attr("width") - g.graph().width * initialScale) / 2, 20).scale(initialScale));
+
+		svg.attr('height', g.graph().height * initialScale + 50);
+		}})();
+
+		</script>
+		''')
+
+		return ''.join(ret2)
