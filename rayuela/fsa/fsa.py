@@ -72,6 +72,11 @@ class FSA:
 		self.Sigma.add(a)
 		self.δ[i][a][j] += w
 
+	def set_arc(self, i, a, j, w):
+		self.add_states([i, j])
+		self.Sigma.add(a)
+		self.δ[i][a][j] = w
+
 	def set_I(self, q, w=None):
 		if w is None: w = self.R.one
 		self.add_state(q)
@@ -272,7 +277,6 @@ class FSA:
 	def intersect(self, fsa):
 		"""
 		on-the-fly weighted intersection
-		epsilon handling from https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.226.1850
 		"""
 
 		# the two machines need to be in the same semiring
@@ -282,41 +286,38 @@ class FSA:
 		product_fsa = FSA(R=self.R)
 		for (q1, w1), (q2, w2) in product(self.I, fsa.I):
 			product_fsa.add_I(PairState(q1, q2), w=w1 * w2)
+		
+		self_initials = {q: w for q, w in self.I}
+		fsa_initials = {q: w for q, w in fsa.I}
 
-		visited = set([(list(self.λ.keys())[0], list(fsa.λ.keys())[0], State('0'))])
-		stack = [(list(self.λ.keys())[0], list(fsa.λ.keys())[0], State('0'))]
+		visited = set([(i1, i2, State('0')) for i1, i2 in product(self_initials, fsa_initials)])
+		stack = [(i1, i2, State('0')) for i1, i2 in product(self_initials, fsa_initials)]
 
 		self_finals = {q: w for q, w in self.F}
 		fsa_finals = {q: w for q, w in fsa.F}
 
-		added_arcs = set()
 		while stack:
-			q1, q2, q3 = stack.pop()
+			q1, q2, qf = stack.pop()
 
-			E1 = [((a, j), w) for ((a, j), w) in self.arcs(q1)] + \
-                            [((ε_l, q1), self.R.one)]
-			E2 = [((a, j), w) for ((a, j), w) in fsa.arcs(q2)] + \
-                            [((ε_l, q2), self.R.one)]
+			E1 = [(a if a != ε else ε_2, j, w) for (a, j, w) in self.arcs(q1)] + \
+                            [(ε_1, q1, self.R.one)]
+			E2 = [(a if a != ε else ε_1, j, w) for (a, j, w) in fsa.arcs(q2)] + \
+                            [(ε_2, q2, self.R.one)]
 
-			M = [(((a1, j1), w1), ((a2, j2), w2))
-				 for ((a1, j1), w1), ((a2, j2), w2) in product(E1, E2)
-				 if epsilon_filter(a1, a2, q3) != State('⊥')]
+			M = [((a1, j1, w1), (a2, j2, w2))
+				 for (a1, j1, w1), (a2, j2, w2) in product(E1, E2)
+				 if epsilon_filter(a1, a2, qf) != State('⊥')]
 
-			for ((a1, j1), w1), ((a2, j2), w2) in M:
-				q3 = epsilon_filter(a1, a2, q3)
+			for (a1, j1, w1), (a2, j2, w2) in M:
 
-				# since this is run multiple times due to epsilon filtering,
-				# we don't want to add the same edge multiple times
-				# (and increase its weight)
-				if (q1, q2, j1, j2, a1, a2) not in added_arcs:
-					product_fsa.add_arc(
-						PairState(q1, q2), a1,
-						PairState(j1, j2), w=w1*w2)
-					added_arcs.add((q1, q2, j1, j2, a1, a2))
+				product_fsa.set_arc(
+					PairState(q1, q2), a1,
+					PairState(j1, j2), w=w1*w2)
 
-				if (j1, j2, q3) not in visited:
-					stack.append((j1, j2, q3))
-					visited.add((j1, j2, q3))
+				_qf = epsilon_filter(a1, a2, qf)
+				if (j1, j2, _qf) not in visited:
+					stack.append((j1, j2, _qf))
+					visited.add((j1, j2, _qf))
 
 			# final state handling
 			if q1 in self_finals and q2 in fsa_finals:
@@ -330,16 +331,20 @@ class FSA:
 		tikz_string = []
 		previous_ids, positioning = [], ''
 		rows = {}
-		initial = set([q for q, w in self.I])
-		final = set([q for q, w in self.F])
+
+		initial = {q: w for q, w in self.I}
+		final = {q: w for q, w in self.F}
 
 		for jj, q in enumerate(self.Q):
 			options = 'state'
+			additional = ''
 
 			if q in initial:
 				options += ', initial'
+				additional = f' / {initial[q]}'
 			if q in final:
 				options += ', accepting'
+				additional = f' / {final[q]}'
 
 			if jj >= max_per_row:
 				positioning = f'below = of {previous_ids[jj - max_per_row]}'
@@ -348,7 +353,7 @@ class FSA:
 			previous_ids.append(f'q{q.idx}')
 			rows[q] = jj // max_per_row
 
-			tikz_string.append(f'\\node[{options}] (q{q.idx}) [{positioning}] {{ {q.idx} }}; \n')
+			tikz_string.append(f'\\node[{options}] (q{q.idx}) [{positioning}] {{ ${q.idx}{additional}$ }}; \n')
 
 		tikz_string.append('\\draw')
 
@@ -356,7 +361,7 @@ class FSA:
 
 		for jj, q in enumerate(self.Q):
 			target_edge_labels = dict()
-			for (a, j), w in self.arcs(q):
+			for a, j, w in self.arcs(q):
 				if j not in target_edge_labels:
 					target_edge_labels[j] = f'{a}/{w}'
 				else:
@@ -383,7 +388,7 @@ class FSA:
 				end = '\n'
 				if jj == self.num_states - 1 and ii == len(target_edge_labels) - 1:
 					end = '; \n'
-				tikz_string.append(f'(q{q.idx}) edge[{edge_options}] node{{ {label} }} (q{target.idx}) {end}')
+				tikz_string.append(f'(q{q.idx}) edge[{edge_options}] node{{ ${label}$ }} (q{target.idx}) {end}')
 				drawn_pairs.add(frozenset([q, j]))
 
 		if not len(list(self.arcs(list(self.Q)[-1]))) > 0:
@@ -428,7 +433,7 @@ class FSA:
 		if self.num_states == 0:
 			return '<code>Empty FST</code>'
 
-		if self.num_states > 1200:
+		if self.num_states > 64:
 			return f'FST too large to draw graphic, use fst.ascii_visualize()<br /><code>FST(num_states={self.num_states})</code>'
 
 		finals = {q for q, _ in self.F}
@@ -445,16 +450,18 @@ class FSA:
 
 			ret.append(
 				f'g.setNode("{repr(q)}", {{ label: {json.dumps(label)} , shape: "circle" }});\n')
+				# f'g.setNode("{repr(q)}", {{ label: {json.dumps(hash(label) // 1e8)} , shape: "circle" }});\n')
 
 			ret.append(f'g.node("{repr(q)}").style = "fill: #{color}"; \n')
 
-		# print normalfinal
+		# print normal
 		for q in (self.Q - finals) - initials:
 
 			label = str(q)
 
 			ret.append(
 				f'g.setNode("{repr(q)}", {{ label: {json.dumps(label)} , shape: "circle" }});\n')
+				# f'g.setNode("{repr(q)}", {{ label: {json.dumps(hash(label) // 1e8)} , shape: "circle" }});\n')
 			ret.append(f'g.node("{repr(q)}").style = "fill: #8da0cb"; \n')
 
 		# print final
@@ -469,11 +476,12 @@ class FSA:
 
 			ret.append(
 				f'g.setNode("{repr(q)}", {{ label: {json.dumps(label)} , shape: "circle" }});\n')
+				# f'g.setNode("{repr(q)}", {{ label: {json.dumps(hash(label) // 1e8)} , shape: "circle" }});\n')
 			ret.append(f'g.node("{repr(q)}").style = "fill: #fc8d62"; \n')
 
 		for q in self.Q:
 			to = defaultdict(list)
-			for (a, j), w in self.arcs(q):
+			for a, j, w in self.arcs(q):
 				label = f'{str(a)} / {str(w)}'
 				to[j].append(label)
 
@@ -486,7 +494,7 @@ class FSA:
 
 		# if the machine is too big, do not attempt to make the web browser display it
 		# otherwise it ends up crashing and stuff...
-		if len(ret) > 1200:
+		if len(ret) > 256:
 			return f'FST too large to draw graphic, use fst.ascii_visualize()<br /><code>FST(num_states={self.num_states})</code>'
 
 		ret2 = ['''

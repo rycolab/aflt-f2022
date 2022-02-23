@@ -11,7 +11,6 @@ def spans(min, max, depth, span=()):
             for x in spans(n, max, depth-1, span+(n,)):
                 yield x
 
-# TODO: does this really compute the lcp?
 def lcp(str1, str2):
     """ computes the longest common prefix """
     prefix = ""
@@ -19,7 +18,7 @@ def lcp(str1, str2):
         if str1[n] == str2[n]:
             prefix += str1[n]
         else:
-            continue
+            break
     return prefix
 
 
@@ -84,21 +83,21 @@ def random_weight_negative(semiring):
     else:
         raise AssertionError("Unsupported Semiring")
 
+
 def epsilon_filter(a1, a2, q3):
     """
-    Filter for composition with epsilon transitions
-    from https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.226.1850
+    Filter for composition with epsilon transitions 
     """
     from rayuela.fsa.state import State
-    from rayuela.base.symbol import ε, ε_l
-    if a1 == a2 and a1 != ε_l:
+    from rayuela.base.symbol import ε_1, ε_2
+    if a1 == a2 and a1 not in [ε_1, ε_2]:
         return State('0')
-    elif a1 == ε and a2 == ε and q3 == State('0'):
+    elif a1 == ε_2 and a2 == ε_1 and q3 == State('0'):
         return State('0')
-    elif a1 == ε_l and a2 == ε and q3 != State('2'):
+    elif a1 == ε_1 and a2 == ε_1 and q3 != State('2'):
         return State('1')
-    elif a1 == ε and a2 == ε_l and q3 != State('1'):
-        return State('1')
+    elif a1 == ε_2 and a2 == ε_2 and q3 != State('1'):
+        return State('2')
     else:
         return State('⊥')
 

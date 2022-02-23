@@ -16,4 +16,5 @@ class Sym:
 		return isinstance(other, Sym) and self.sym == other.sym
 
 ε = Sym("ε")
-ε_l = Sym("ε_l")
+ε_1 = Sym("ε_1")
+ε_2 = Sym("ε_2")
