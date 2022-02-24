@@ -9,7 +9,7 @@ from collections import defaultdict as dd
 
 from rayuela.base.semiring import Boolean
 from rayuela.base.misc import epsilon_filter
-from rayuela.base.symbol import Sym, ε, ε_l
+from rayuela.base.symbol import Sym, ε, ε_1, ε_2
 
 from rayuela.fsa.state import State, PairState
 from rayuela.fsa.pathsum import Pathsum, Strategy
@@ -121,8 +121,7 @@ class FSA:
 			for j, w in T.items():
 				if w == self.R.zero:
 					continue
-				# TODO: remove nesting. (Relict due to old arc class)
-				yield (a, j), w
+				yield a, j, w
 
 	def accept(self, string):
 		""" determines whether a string is in the language """
@@ -172,7 +171,7 @@ class FSA:
 
 			in_progress.add(p)
 
-			for (_, q), _ in self.arcs(p):
+			for _, q, _ in self.arcs(p):
 				if q in in_progress:
 					cyclic = True
 				elif q not in finished:
@@ -417,7 +416,7 @@ class FSA:
 		for q, w in self.F:
 			output.append(f"final state:\t{q.idx}\t{w}")
 		for p in self.Q:
-			for (a, q), w in self.arcs(p):
+			for a, q, w in self.arcs(p):
 				output.append(f"{p}\t----{a}/{w}---->\t{q}")
 		return "\n".join(output)
 

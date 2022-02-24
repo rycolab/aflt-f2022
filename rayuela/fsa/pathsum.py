@@ -53,7 +53,7 @@ class Pathsum:
 		""" creates the weight matrix from the automaton """
 		W = self.R.zeros(self.N, self.N)
 		for p in self.fsa.Q:
-			for (a, q), w in self.fsa.arcs(p):
+			for a, q, w in self.fsa.arcs(p):
 				W[self.I[p], self.I[q]] += w
 		return W
 
@@ -192,7 +192,7 @@ class Pathsum:
 
 		# recursion
 		for p in self.fsa.toposort(rev=True):
-			for (_, q), w in self.fsa.arcs(p):
+			for _, q, w in self.fsa.arcs(p):
 				𝜷[p] += 𝜷[q] * w
 
 		return frozendict(𝜷)
