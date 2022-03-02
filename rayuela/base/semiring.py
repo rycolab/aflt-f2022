@@ -46,13 +46,6 @@ class Semiring:
         return hash(self.score)
 
 
-class Product:
-    # TODO add the Cartesian product semiring
-
-    def __init__():
-        pass
-
-
 class Derivation(Semiring):
 
     def __init__(self, score):
@@ -534,38 +527,45 @@ def vector_semiring_builder(semiring, N):
     return VectorSemiring
 
 
+class ProductSemiring(Semiring):
+    def __init__(self, x, y):
+        super().__init__((x, y))
+
+    def star(self):
+        raise NotImplemented
+
+    def __add__(self, other):
+        w1, w2 = self.score[0], other.score[0]
+        v1, v2 = self.score[1], other.score[1]
+        return ProductSemiring(w1 + w2, v1 + v2)
+
+    def __mul__(self, other):
+        w1, w2 = self.score[0], other.score[0]
+        v1, v2 = self.score[1], other.score[1]
+        return ProductSemiring(w1 * w2, v1 * v2)
+
+    def __eq__(self, other):
+        return self.score == other.score
+
+    def __repr__(self):
+        if isinstance(self.score[0], String):
+            # the imporant special case of encoding transducers
+            if len(self.score[0].score) > 0:
+                return f'{self.score[0]} / {self.score[1]}'
+            else:
+                return f'{self.score[1]}'
+        return f'〈{self.score[0]}, {self.score[1]}〉'
+
+    def __hash__(self):
+        return hash(self.score)
+
+
 def product_semiring_builder(semiring1, semiring2):
 
-    class ProductSemiring(Semiring):
-        def __init__(self, x, y):
-            super().__init__((x, y))
-        
-        def star(self):
-            raise NotImplemented
-        
-        def __add__(self, other):
-            w1, w2 = self.score[0], other.score[0]
-            v1, v2 = self.score[1], other.score[1]
-            return ProductSemiring(w1 + w2, v1 + v2)
-
-        def __mul__(self, other):
-            w1, w2 = self.score[0], other.score[0]
-            v1, v2 = self.score[1], other.score[1]     
-            return ProductSemiring(w1 * w2, v1 * v2)
-
-        def __eq__(self, other):
-            return self.score == other.score
-
-        def __repr__(self):
-            return f'〈{self.score[0]}, {self.score[1]}〉'
-
-        def __hash__(self):
-            return hash(self.score)
-        
     ProductSemiring.zero = ProductSemiring(semiring1.zero, semiring2.zero)
     ProductSemiring.one = ProductSemiring(semiring1.one, semiring2.one)
     ProductSemiring.idempotent = semiring1.idempotent and semiring2.idempotent
-        
+
     return ProductSemiring
 
 
