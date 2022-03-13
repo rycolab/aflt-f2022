@@ -273,6 +273,12 @@ class FSA:
 		pathsum = Pathsum(self)
 		return pathsum.pathsum(strategy)
 
+	def edge_marginals(self) -> dict:
+		""" computes the edge marginals μ(q→q') """
+
+		# Homework 2: Question 2
+		raise NotImplementedError
+
 	def intersect(self, fsa):
 		"""
 		on-the-fly weighted intersection
