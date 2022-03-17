@@ -207,9 +207,48 @@ class Pathsum:
 
 		raise NotImplementedError
 
+	def _lehmann(self, zero=True):
+		"""
+		Lehmann's (1977) algorithm.
+		"""
+
+		# initialization
+		V = self.W.copy()
+		U = self.W.copy()
+
+
+		# basic iteration
+		for j in range(self.N):
+			V, U = U, V
+			V = self.R.zeros(self.N, self.N)
+			for i in range(self.N):
+				for k in range(self.N):
+					# i ➙ j ⇝ j ➙ k
+					V[i,k] = U[i,k] + U[i,j] * U[j,j].star() * U[j,k]
+
+		# post-processing (paths of length zero)
+		if zero:
+			for i in range(self.N):
+				V[i,i] += self.R.one
+
+
+		return V
+
 	def lehmann(self, zero=True):
-		""" Lehmann's (1977) algorithm. """
-		raise NotImplementedError
+
+		V = self._lehmann(zero=zero)
+
+		W = {}
+		for p in self.fsa.Q:
+			for q in self.fsa.Q:
+				if p in self.I and q in self.I:
+					W[p, q] = V[self.I[p], self.I[q]]
+				elif p == q and zero:
+					W[p, q] = self.R.one
+				else:
+					W[p, q] = self.R.zero
+
+		return frozendict(W)
 
 	def lehmann_pathsum(self): return self.allpairs_pathsum(self.lehmann())
 	def lehmann_fwd(self): return self.allpairs_fwd(self.lehmann())
