@@ -12,12 +12,12 @@ class FST(FSA):
 	def __init__(self, R=Boolean):
 
 		# DEFINITION
-		# A weighted finite-state transducer is a 5-tuple <R, Σ, Q, δ, λ, ρ> where
-		# TODO: update definition
-		# • R is a semiring;
+		# A weighted finite-state transducer is a 8-tuple <Σ, Δ, Q, F, I, δ, λ, ρ> where
 		# • Σ is an alphabet of symbols;
 		# • Δ is an alphabet of symbols;
 		# • Q is a finite set of states;
+		# • I ⊆ Q is a set of initial states;
+		# • F ⊆ Q is a set of final states;
 		# • δ is a finite relation Q × Σ × Δ × Q × R;
 		# • λ is an initial weight function;
 		# • ρ is a final weight function.
@@ -64,14 +64,13 @@ class FST(FSA):
 		self.ρ = frozendict(self.ρ)
 
 	def arcs(self, i, no_eps=False):
-		for a, T in self.δ[i].items():
-			if no_eps and a == ε:
+		for ab, T in self.δ[i].items():
+			if no_eps and ab == (ε, ε):
 				continue
 			for j, w in T.items():
 				if w == self.R.zero:
 					continue
-				# TODO: remove nesting. (Relict due to old arc class)
-				yield a, j, w
+				yield ab, j, w
 
 	def accept(self, string1, string2):
 		""" determines whether a string is in the language """
