@@ -14,6 +14,7 @@ class Strategy:
 	LEHMANN = 4
 	JOHNSON = 5
 	FIXPOINT = 6
+	DECOMPOSED_LEHMANN = 7
 
 class Pathsum:
 
@@ -79,6 +80,9 @@ class Pathsum:
 
 		elif strategy == Strategy.FIXPOINT:
 			return self.fixpoint_pathsum()
+
+		elif strategy == Strategy.DECOMPOSED_LEHMANN:
+			return self.decomposed_lehmann_pathsum()
 
 		else:
 			raise NotImplementedError
@@ -253,6 +257,10 @@ class Pathsum:
 	def lehmann_pathsum(self): return self.allpairs_pathsum(self.lehmann())
 	def lehmann_fwd(self): return self.allpairs_fwd(self.lehmann())
 	def lehmann_bwd(self): return self.allpairs_bwd(self.lehmann())
+
+	def decomposed_lehmann_pathsum(self):
+		# Homework 3: Question 4
+		raise NotImplementedError
 
 	def bellmanford_pathsum(self):
 		pathsum = self.R.zero
