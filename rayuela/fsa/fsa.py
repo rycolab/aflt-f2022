@@ -221,7 +221,7 @@ class FSA:
 
 	@property
 	def pushed(self) -> bool:
-
+			
 		# Homework 1: Question 2
 		raise NotImplementedError
 

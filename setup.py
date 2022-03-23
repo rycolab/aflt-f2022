@@ -10,7 +10,6 @@ install_requires = [
 	
 	# Libraries used for testing
 	"pytest", 
-	"dill "
 ]
 
 
