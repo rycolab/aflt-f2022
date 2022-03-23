@@ -6,7 +6,8 @@ install_requires = [
 	"frozendict",
 	"frozenlist",
 	"pyconll",
-	"nltk"
+	"nltk",
+	"pytest"
 ]
 
 
