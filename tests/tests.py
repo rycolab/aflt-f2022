@@ -4,6 +4,7 @@ import pickle
 # TODO: 
 # - Examples
 # - Edge cases
+# - Extend random machines to other semirings
 
 with open("tests/pickles/fsas.pkl", 'rb') as f:
     fsas = pickle.load(f)
@@ -11,6 +12,7 @@ with open("tests/pickles/fsas.pkl", 'rb') as f:
 
 
 def test_deterministic():
+    # TODO
     for fsa in fsas:
         assert fsa.deterministic == True
 
@@ -39,7 +41,7 @@ def test_accessible():
         accessible_states_fsas = pickle.load(f)
     
     for fsa, accessible_states in zip(fsas, accessible_states_fsas):
-        assert fsa.accesible() == accessible_states
+        assert fsa.accessible() == accessible_states
 
 def test_coaccessible():
     
@@ -47,5 +49,21 @@ def test_coaccessible():
         coaccessible_states_fsas = pickle.load(f)
     
     for fsa, coaccessible_states in zip(fsas, coaccessible_states_fsas):
-        assert fsa.coaccesible() == coaccessible_states
+        assert fsa.coaccessible() == coaccessible_states
+
+def test_trim():
+    # TODO
+    pass
+
+def test_union():
+    # TODO
+    pass
+
+def test_concatenate():
+    # TODO
+    pass
+
+def test_closure():
+    # TODO
+    pass
 

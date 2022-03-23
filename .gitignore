@@ -1,6 +1,6 @@
 # Files
 testing.ipynb
-
+tests/pickles/generate_pickles.py
 # Other
 __pycache__
 .ipynb_checkpoints
