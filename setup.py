@@ -7,7 +7,10 @@ install_requires = [
 	"frozenlist",
 	"pyconll",
 	"nltk",
-	"pytest"
+	
+	# Libraries used for testing
+	"pytest", 
+	"dill "
 ]
 
 
