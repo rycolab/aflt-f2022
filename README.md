@@ -7,7 +7,3 @@ To install the course library run
 pip install -e .
 ``
 in the base directory.
-
-============
-
-This change does not do nothing
