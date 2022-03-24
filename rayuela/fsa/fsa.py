@@ -261,7 +261,7 @@ class FSA:
 		# Homework 1: Question 4
 		raise NotImplementedError
 
-	def closure(self) -> FSA:
+	def kleene_closure(self) -> FSA:
 		""" compute the Kleene closure of the FSA """
 
 		# Homework 1: Question 4
