@@ -16,5 +16,5 @@ jobs:
         uses: AndreasAugustin/actions-template-sync@v0.3.0-draft
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          source_repo_path: rycolab/aflt-f2022
+          source_repo_path:  test-organization-dani/aflt-f2022
           upstream_branch: main # defaults to main
