@@ -18,4 +18,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           source_repo_path:  rycolab/aflt-f2022
           upstream_branch: main # defaults to main
-	  label: enhancement
+	  pr_labels: enhancement
