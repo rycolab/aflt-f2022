@@ -1,13 +1,13 @@
 from rayuela.fsa.fsa import FSA
 import pickle
 from rayuela.base.semiring import Tropical, Real
-from rayuela.fsa.state import State
+from rayuela.fsa.state import PairState, State
 from rayuela.base.symbol import Sym, ε
 
 
 
 # TODO: 
-# - Examples
+# - More examples
 # - Edge cases
 # - Extend random machines to other semirings
 
@@ -16,6 +16,48 @@ hw_path = pickles_path + "/hw1"
 
 with open(f"{pickles_path}/fsas.pkl", 'rb') as f:
     fsas = pickle.load(f)
+
+FSA1 = FSA(Real)
+
+FSA1.add_arc(State(0), Sym('a'), State(0), w=Real(0.043))
+FSA1.add_arc(State(0), Sym('a'), State(1), w=Real(0.147))
+FSA1.add_arc(State(0), Sym('b'), State(2), w=Real(0.108))
+
+FSA1.add_arc(State(1), Sym('a'), State(0), w=Real(0.125))
+FSA1.add_arc(State(1), Sym('a'), State(2), w=Real(0.026))
+FSA1.add_arc(State(1), Sym('b'), State(0), w=Real(0.151))
+
+FSA1.add_arc(State(2), Sym('a'), State(0), w=Real(0.128))
+FSA1.add_arc(State(2), Sym('a'), State(2), w=Real(0.088))
+FSA1.add_arc(State(2), Sym('b'), State(1), w=Real(0.024))
+
+
+FSA1.set_I(State(0), w=Real(0.078))
+FSA1.add_F(State(2), w=Real(0.156))
+
+FSA2 = FSA(Real)
+
+FSA2.add_arc(State(0), Sym('b'), State(0), w=Real(0.147))
+FSA2.add_arc(State(0), Sym('b'), State(1), w=Real(0.136))
+FSA2.add_arc(State(0), Sym('b'), State(2), w=Real(0.025))
+FSA2.add_arc(State(0), Sym('a'), State(1), w=Real(0.076))
+FSA2.add_arc(State(0), Sym('a'), State(2), w=Real(0.159))
+
+
+FSA2.add_arc(State(1), Sym('b'), State(0), w=Real(0.125))
+FSA2.add_arc(State(1), Sym('b'), State(1), w=Real(0.007))
+FSA2.add_arc(State(1), Sym('b'), State(2), w=Real(0.074))
+FSA2.add_arc(State(1), Sym('a'), State(2), w=Real(0.047))
+
+FSA2.add_arc(State(2), Sym('a'), State(0), w=Real(0.019))
+FSA2.add_arc(State(2), Sym('a'), State(2), w=Real(0.084))
+FSA2.add_arc(State(2), Sym('b'), State(0), w=Real(0.15))
+
+
+FSA2.set_I(State(0), w=Real(0.141))
+FSA2.add_F(State(2), w=Real(0.062))
+
+
 
 
 
@@ -268,6 +310,40 @@ def test_reverse_string():
     # TODO: show that for any string x∈Σ∗ accepted by the original automaton, ←−xis accepted by its reversal
     pass
 
+def test_reverse_example():
+
+    T1 = FSA(Real)
+
+    T1.add_arc(State(0), Sym('a'), State(1), w=Real(0.1))
+
+    T1.add_arc(State(1), Sym('b'), State(2), w=Real(0.3))
+    T1.add_arc(State(1), Sym('b'), State(3), w=Real(0.4))
+    T1.add_arc(State(1), Sym('a'), State(0), w=Real(0.2))
+
+    T1.add_arc(State(2), Sym('a'), State(3), w=Real(0.5))
+
+    T1.add_arc(State(3), Sym('a'), State(3), w=Real(0.6))
+
+    T1.set_I(State(0), w=Real(1.0))
+    T1.add_F(State(3), w=Real(0.7))
+
+    REVERSED = FSA(Real)
+
+    REVERSED.add_arc(State(0), Sym('a'), State(1), w=Real(0.2))
+
+    REVERSED.add_arc(State(1), Sym('a'), State(0), w=Real(0.1))
+
+    REVERSED.add_arc(State(2), Sym('b'), State(1), w=Real(0.3))
+
+    REVERSED.add_arc(State(3), Sym('b'), State(1), w=Real(0.4))
+    REVERSED.add_arc(State(3), Sym('a'), State(2), w=Real(0.5))
+    REVERSED.add_arc(State(3), Sym('a'), State(3), w=Real(0.6))
+
+    REVERSED.add_F(State(0), w=Real(1.0))
+    REVERSED.set_I(State(3), w=Real(0.7))
+
+    assert REVERSED.__str__() == T1.reverse().__str__()
+
 def test_reverse():
     
     with open(f"{hw_path}/reversed_fsas_ascii.pkl", 'rb') as f:
@@ -279,6 +355,24 @@ def test_reverse():
 ##########################
 ##### Testing accessible & coaccessible algorithms
 ##########################
+
+NOT_TRIMMED_FSA = FSA(Real)
+
+NOT_TRIMMED_FSA.add_arc(State(0), Sym('b'), State(1), w=Real(0.1))
+
+
+NOT_TRIMMED_FSA.add_arc(State(1), Sym('b'), State(1), w=Real(0.2))
+NOT_TRIMMED_FSA.add_arc(State(1), Sym('a'), State(2), w=Real(0.3))
+NOT_TRIMMED_FSA.add_arc(State(1), Sym('a'), State(3), w=Real(0.4))
+NOT_TRIMMED_FSA.add_arc(State(1), Sym('a'), State(5), w=Real(0.4))
+
+
+NOT_TRIMMED_FSA.add_arc(State(2), Sym('b'), State(3), w=Real(0.5))
+
+NOT_TRIMMED_FSA.add_arc(State(4), Sym('b'), State(3), w=Real(0.5))
+
+NOT_TRIMMED_FSA.set_I(State(0), w=Real(1.0))
+NOT_TRIMMED_FSA.add_F(State(3), w=Real(0.6))
 
 def test_accessible():
     
@@ -296,13 +390,39 @@ def test_coaccessible():
     for fsa, coaccessible_states in zip(fsas, coaccessible_states_fsas):
         assert fsa.coaccessible() == coaccessible_states
 
+def test_accessible_example():
+
+    accessible_states = {State(0),State(1),State(2),State(3),State(5)}
+
+    assert NOT_TRIMMED_FSA.accessible() == accessible_states
+
+def test_coaccessible_example():
+
+    coaccessible_states = {State(0),State(1),State(2),State(3),State(4)}
+
+    assert NOT_TRIMMED_FSA.coaccessible() == coaccessible_states
+
 ##########################
 ##### Testing trim algorithm
 ##########################
 
 def test_trim():
-    # TODO
-    pass
+    TRIMMED = FSA(Real)
+
+    TRIMMED.add_arc(State(0), Sym('b'), State(1), w=Real(0.1))
+
+
+    TRIMMED.add_arc(State(1), Sym('b'), State(1), w=Real(0.2))
+    TRIMMED.add_arc(State(1), Sym('a'), State(2), w=Real(0.3))
+    TRIMMED.add_arc(State(1), Sym('a'), State(3), w=Real(0.4))
+
+
+    TRIMMED.add_arc(State(2), Sym('b'), State(3), w=Real(0.5))
+
+    TRIMMED.set_I(State(0), w=Real(1.0))
+    TRIMMED.add_F(State(3), w=Real(0.6))
+
+    assert TRIMMED.__str__() == NOT_TRIMMED_FSA.trim().__str__()
 
 
 ##########################
@@ -317,6 +437,48 @@ def test_union():
     for left_fsa, right_fsa, union_fsa in zip(fsas[:middle], fsas[middle:], union_fsas):
         assert left_fsa.union(right_fsa).__str__() == union_fsa.__str__()
 
+
+def test_union_example():
+    UNION = FSA(Real)
+
+    UNION.add_arc(PairState(1,2), Sym('a'), PairState(1,0), w=Real(0.128))
+    UNION.add_arc(PairState(1,2), Sym('a'), PairState(1,2), w=Real(0.088))
+    UNION.add_arc(PairState(1,2), Sym('b'), PairState(1,1), w=Real(0.024))
+
+    UNION.add_arc(PairState(2,1), Sym('b'), PairState(2,0), w=Real(0.125))
+    UNION.add_arc(PairState(2,1), Sym('b'), PairState(2,1), w=Real(0.007))
+    UNION.add_arc(PairState(2,1), Sym('b'), PairState(2,2), w=Real(0.074))
+    UNION.add_arc(PairState(2,1), Sym('a'), PairState(2,2), w=Real(0.047))
+
+    UNION.add_arc(PairState(1,1), Sym('a'), PairState(1,0), w=Real(0.125))
+    UNION.add_arc(PairState(1,1), Sym('a'), PairState(1,2), w=Real(0.026))
+    UNION.add_arc(PairState(1,1), Sym('b'), PairState(1,0), w=Real(0.151))
+
+    UNION.add_arc(PairState(2,0), Sym('b'), PairState(2,0), w=Real(0.147))
+    UNION.add_arc(PairState(2,0), Sym('b'), PairState(2,1), w=Real(0.136))
+    UNION.add_arc(PairState(2,0), Sym('b'), PairState(2,2), w=Real(0.025))
+    UNION.add_arc(PairState(2,0), Sym('a'), PairState(2,1), w=Real(0.076))
+    UNION.add_arc(PairState(2,0), Sym('a'), PairState(2,2), w=Real(0.159))
+
+    UNION.add_arc(PairState(2,2), Sym('a'), PairState(2,0), w=Real(0.019))
+    UNION.add_arc(PairState(2,2), Sym('a'), PairState(2,2), w=Real(0.084))
+    UNION.add_arc(PairState(2,2), Sym('b'), PairState(2,0), w=Real(0.15))
+
+    UNION.add_arc(PairState(1,0), Sym('a'), PairState(1,0), w=Real(0.043))
+    UNION.add_arc(PairState(1,0), Sym('a'), PairState(1,1), w=Real(0.147))
+    UNION.add_arc(PairState(1,0), Sym('b'), PairState(1,2), w=Real(0.108))
+
+
+    UNION.set_I(PairState(1,0), w=Real(0.078))
+    UNION.set_I(PairState(2,0), w=Real(0.141))
+
+    UNION.add_F(PairState(1,2), w=Real(0.156))
+    UNION.add_F(PairState(2,2), w=Real(0.062))
+
+    union = FSA1.union(FSA2)
+
+    assert UNION.__str__() == union.__str__()
+
 ##########################
 ##### Testing concatenate algorithm
 ##########################
@@ -329,6 +491,47 @@ def test_concatenate():
     for left_fsa, right_fsa, concat_fsa in zip(fsas[:middle], fsas[middle:], concat_fsas):
         assert left_fsa.concatenate(right_fsa).__str__() == concat_fsa.__str__()
 
+def test_concatenate_example():
+    CONCAT = FSA(Real)
+
+    CONCAT.add_arc(PairState(1,2), Sym('a'), PairState(1,0), w=Real(0.128))
+    CONCAT.add_arc(PairState(1,2), Sym('a'), PairState(1,2), w=Real(0.088))
+    CONCAT.add_arc(PairState(1,2), Sym('b'), PairState(1,1), w=Real(0.024))
+    CONCAT.add_arc(PairState(1,2), ε, PairState(2,0), w=Real(0.021996))
+
+
+    CONCAT.add_arc(PairState(2,1), Sym('b'), PairState(2,0), w=Real(0.125))
+    CONCAT.add_arc(PairState(2,1), Sym('b'), PairState(2,1), w=Real(0.007))
+    CONCAT.add_arc(PairState(2,1), Sym('b'), PairState(2,2), w=Real(0.074))
+    CONCAT.add_arc(PairState(2,1), Sym('a'), PairState(2,2), w=Real(0.047))
+
+    CONCAT.add_arc(PairState(1,1), Sym('a'), PairState(1,0), w=Real(0.125))
+    CONCAT.add_arc(PairState(1,1), Sym('a'), PairState(1,2), w=Real(0.026))
+    CONCAT.add_arc(PairState(1,1), Sym('b'), PairState(1,0), w=Real(0.151))
+
+    CONCAT.add_arc(PairState(2,0), Sym('b'), PairState(2,0), w=Real(0.147))
+    CONCAT.add_arc(PairState(2,0), Sym('b'), PairState(2,1), w=Real(0.136))
+    CONCAT.add_arc(PairState(2,0), Sym('b'), PairState(2,2), w=Real(0.025))
+    CONCAT.add_arc(PairState(2,0), Sym('a'), PairState(2,1), w=Real(0.076))
+    CONCAT.add_arc(PairState(2,0), Sym('a'), PairState(2,2), w=Real(0.159))
+
+    CONCAT.add_arc(PairState(2,2), Sym('a'), PairState(2,0), w=Real(0.019))
+    CONCAT.add_arc(PairState(2,2), Sym('a'), PairState(2,2), w=Real(0.084))
+    CONCAT.add_arc(PairState(2,2), Sym('b'), PairState(2,0), w=Real(0.15))
+
+    CONCAT.add_arc(PairState(1,0), Sym('a'), PairState(1,0), w=Real(0.043))
+    CONCAT.add_arc(PairState(1,0), Sym('a'), PairState(1,1), w=Real(0.147))
+    CONCAT.add_arc(PairState(1,0), Sym('b'), PairState(1,2), w=Real(0.108))
+
+
+    CONCAT.set_I(PairState(1,0), w=Real(0.078))
+
+    CONCAT.add_F(PairState(2,2), w=Real(0.062))
+
+    concat = FSA1.concatenate(FSA2)
+    
+    assert CONCAT.__str__() == concat.__str__()
+
 ##########################
 ##### Testing Kleene closure algorithm
 ##########################
@@ -340,3 +543,31 @@ def test_closure():
     
     for fsa, kleene in zip(fsas, kleene_fsas):
         assert fsa.kleene_closure().__str__() == kleene.__str__()
+
+def test_closure_example():
+    KLEENE = FSA(Real)
+
+    KLEENE.add_arc(State(0), Sym('a'), State(0), w=Real(0.043))
+    KLEENE.add_arc(State(0), Sym('a'), State(1), w=Real(0.147))
+    KLEENE.add_arc(State(0), Sym('b'), State(2), w=Real(0.108))
+    KLEENE.add_arc(State(0), ε, State(2), w=Real(1.0))
+
+    KLEENE.add_arc(State(1), Sym('a'), State(0), w=Real(0.125))
+    KLEENE.add_arc(State(1), Sym('a'), State(2), w=Real(0.026))
+    KLEENE.add_arc(State(1), Sym('b'), State(0), w=Real(0.151))
+
+    KLEENE.add_arc(State(2), Sym('a'), State(0), w=Real(0.128))
+    KLEENE.add_arc(State(2), Sym('a'), State(2), w=Real(0.088))
+    KLEENE.add_arc(State(2), Sym('b'), State(1), w=Real(0.024))
+    KLEENE.add_arc(State(2), ε, State(5), w=Real(0.156))
+    KLEENE.add_arc(State(2), ε, State(0), w=Real(1.0))
+
+    KLEENE.add_arc(State(4), ε, State(0), w=Real(0.078))
+    KLEENE.add_arc(State(4), ε, State(5), w=Real(1.0))
+
+
+    KLEENE.set_I(State(4), w=Real(1.0))
+    KLEENE.add_F(State(5), w=Real(1.0))
+
+    kleene = FSA1.kleene_closure()
+    assert KLEENE.__str__() == kleene.__str__()
