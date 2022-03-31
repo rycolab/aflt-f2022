@@ -50,10 +50,16 @@ class FST(FSA):
 		self.δ[i][(a, b)][j] += w
 
 	def set_arc(self, i, a, b, j, w):
+		if not isinstance(i, State): i = State(i)
+		if not isinstance(j, State): j = State(j)
+		if not isinstance(a, Sym): a = Sym(a)
+		if not isinstance(a, Sym): b = Sym(b)
+		if not isinstance(w, self.R): w = self.R(w)
+
 		self.add_states([i, j])
 		self.Sigma.add(a)
 		self.Delta.add(b)
-		self.δ[i][a][j] = w
+		self.δ[i][(a, b)][j] = w
 
 	def freeze(self):
 		self.Sigma = frozenset(self.Sigma)
