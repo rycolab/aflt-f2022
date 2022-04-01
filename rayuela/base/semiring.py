@@ -448,7 +448,7 @@ class Real(Semiring):
 
     def __eq__(self, other):
         #return float(self.score) == float(other.score)
-        return np.allclose(float(self.score), float(other.score), atol=1e-2)
+        return np.allclose(float(self.score), float(other.score), atol=1e-3)
 
     # TODO: find out why this wasn't inherited
     def __hash__(self):
