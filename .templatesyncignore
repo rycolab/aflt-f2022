@@ -1,5 +1,3 @@
 rayuela/fsa/fsa.py
 rayuela/fsa/fst.py
-rayuela/fsa/pathsum.py
 rayuela/fsa/scc.py
-rayuela/fsa/transformer.py

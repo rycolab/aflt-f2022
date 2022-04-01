@@ -180,6 +180,8 @@ class Pathsum:
 		return pathsum
 
 	def viterbi_fwd(self):
+		
+		# Homework 2: Question 2
 		raise NotImplementedError
 
 	def viterbi_bwd(self):
@@ -209,7 +211,32 @@ class Pathsum:
 	def dijkstra_fwd(self, I=None):
 		""" Dijkstra's algorithm without early stopping. """
 
-		raise NotImplementedError
+		assert self.fsa.R.superior
+
+		# initialization
+		α = self.R.chart()
+		agenda = PriorityQueue(R=self.fsa.R)
+		popped = set([]) 
+
+		# base case
+		if I is None:
+			for q, w in self.fsa.I:
+				agenda.push(q, w)
+		else:
+			for q in I:
+				agenda.push(q, self.R.one)
+
+		# main loop
+		while agenda:
+			i, v = agenda.pop()
+			popped.add(i)
+			α[i] += v
+
+			for _, j, w in self.fsa.arcs(i):
+				if j not in popped:
+					agenda.push(j, v * w)
+
+		return α
 
 	def _lehmann(self, zero=True):
 		"""
