@@ -11,6 +11,11 @@ from rayuela.base.symbol import Sym, ε
 # - Edge cases
 # - Extend random machines to other semirings
 
+def compare_fsas(fsa1: FSA, fsa2: FSA) -> bool:
+    
+    return fsa1.pathsum() == fsa2.pathsum()
+
+
 pickles_path = "autograding_tests/pickles"
 hw_path = pickles_path + "/hw1"
 
@@ -68,7 +73,9 @@ FSA2.add_F(State(2), w=Real(0.062))
 def test_deterministic():
     with open(f"{hw_path}/deterministic_results.pkl", 'rb') as f:
         deterministic_results = pickle.load(f)
-    for fsa, result in zip(fsas, deterministic_results):
+    with open(f"{hw_path}/deterministic_fsas.pkl", 'rb') as f:
+        dfsas = pickle.load(f)
+    for fsa, result in zip(dfsas, deterministic_results):
         assert fsa.deterministic == result
 
 
@@ -342,15 +349,15 @@ def test_reverse_example():
     REVERSED.add_F(State(0), w=Real(1.0))
     REVERSED.set_I(State(3), w=Real(0.7))
 
-    assert REVERSED.__str__() == T1.reverse().__str__()
+    assert True == compare_fsas(REVERSED, T1.reverse())
 
 def test_reverse():
     
-    with open(f"{hw_path}/reversed_fsas_ascii.pkl", 'rb') as f:
-        reversed_asciis = pickle.load(f)
+    with open(f"{hw_path}/reversed_fsas.pkl", 'rb') as f:
+        reversed_fsas = pickle.load(f)
     
-    for fsa, rfsa in zip(fsas, reversed_asciis):
-        assert fsa.reverse().__str__() == rfsa
+    for fsa, rfsa in zip(fsas, reversed_fsas):
+        assert True == compare_fsas(fsa.reverse(), rfsa)
 
 ##########################
 ##### Testing accessible & coaccessible algorithms
@@ -422,7 +429,7 @@ def test_trim():
     TRIMMED.set_I(State(0), w=Real(1.0))
     TRIMMED.add_F(State(3), w=Real(0.6))
 
-    assert TRIMMED.__str__() == NOT_TRIMMED_FSA.trim().__str__()
+    assert compare_fsas(TRIMMED, NOT_TRIMMED_FSA.trim())
 
 
 ##########################
@@ -435,7 +442,7 @@ def test_union():
     
     middle = int(len(fsas)/2)
     for left_fsa, right_fsa, union_fsa in zip(fsas[:middle], fsas[middle:], union_fsas):
-        assert left_fsa.union(right_fsa).__str__() == union_fsa.__str__()
+        assert compare_fsas(left_fsa.union(right_fsa),union_fsa)
 
 
 def test_union_example():
@@ -477,7 +484,7 @@ def test_union_example():
 
     union = FSA1.union(FSA2)
 
-    assert UNION.__str__() == union.__str__()
+    assert compare_fsas(UNION,union)
 
 ##########################
 ##### Testing concatenate algorithm
@@ -489,7 +496,7 @@ def test_concatenate():
     
     middle = int(len(fsas)/2)
     for left_fsa, right_fsa, concat_fsa in zip(fsas[:middle], fsas[middle:], concat_fsas):
-        assert left_fsa.concatenate(right_fsa).__str__() == concat_fsa.__str__()
+        assert compare_fsas(left_fsa.concatenate(right_fsa), concat_fsa)
 
 def test_concatenate_example():
     CONCAT = FSA(Real)
@@ -530,7 +537,7 @@ def test_concatenate_example():
 
     concat = FSA1.concatenate(FSA2)
     
-    assert CONCAT.__str__() == concat.__str__()
+    assert compare_fsas(CONCAT,concat)
 
 ##########################
 ##### Testing Kleene closure algorithm
@@ -542,7 +549,7 @@ def test_closure():
         kleene_fsas = pickle.load(f)
     
     for fsa, kleene in zip(fsas, kleene_fsas):
-        assert fsa.kleene_closure().__str__() == kleene.__str__()
+        assert compare_fsas(fsa.kleene_closure(), kleene)
 
 def test_closure_example():
     KLEENE = FSA(Real)
@@ -570,4 +577,4 @@ def test_closure_example():
     KLEENE.add_F(State(5), w=Real(1.0))
 
     kleene = FSA1.kleene_closure()
-    assert KLEENE.__str__() == kleene.__str__()
+    assert compare_fsas(KLEENE,kleene)
