@@ -570,11 +570,13 @@ def test_closure_example():
     KLEENE.add_arc(State(2), ε, State(0), w=Real(1.0))
 
     KLEENE.add_arc(State(4), ε, State(0), w=Real(0.078))
-    KLEENE.add_arc(State(4), ε, State(5), w=Real(1.0))
+    KLEENE.add_arc(State(5), ε, State(4), w=Real(1.0))
 
 
     KLEENE.set_I(State(4), w=Real(1.0))
     KLEENE.add_F(State(5), w=Real(1.0))
+
+    KLEENE
 
     kleene = FSA1.kleene_closure()
     assert compare_fsas(KLEENE,kleene)
