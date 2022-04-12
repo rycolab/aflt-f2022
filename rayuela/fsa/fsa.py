@@ -291,6 +291,11 @@ class FSA:
 		# Homework 2: Question 2
 		raise NotImplementedError
 
+
+	def coaccessible_intersection(self, fsa):
+		# Homework 2: Question 3
+		raise NotImplementedError
+
 	def intersect(self, fsa):
 		"""
 		on-the-fly weighted intersection
