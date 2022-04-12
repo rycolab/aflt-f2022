@@ -161,6 +161,10 @@ class FSA:
 		from rayuela.fsa.transformer import Transformer
 		return Transformer.push(self)
 
+	def determinize(self, strategy=None):
+		# Homework 4: Question 4
+		raise NotImplementedError
+
 	def minimize(self, strategy=None):
 		# Homework 5: Question 3
 		raise NotImplementedError
