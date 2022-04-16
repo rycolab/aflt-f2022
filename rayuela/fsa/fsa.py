@@ -156,6 +156,18 @@ class FSA:
 				F.set_F(q, w)
 
 		return F
+	
+	def push(self):
+		from rayuela.fsa.transformer import Transformer
+		return Transformer.push(self)
+
+	def determinize(self, strategy=None):
+		# Homework 4: Question 4
+		raise NotImplementedError
+
+	def minimize(self, strategy=None):
+		# Homework 5: Question 3
+		raise NotImplementedError
 
 	def dfs(self):
 		""" Depth-first search (Cormen et al. 2019; Section 22.3) """
@@ -221,7 +233,7 @@ class FSA:
 
 	@property
 	def pushed(self) -> bool:
-
+			
 		# Homework 1: Question 2
 		raise NotImplementedError
 
@@ -261,7 +273,7 @@ class FSA:
 		# Homework 1: Question 4
 		raise NotImplementedError
 
-	def closure(self) -> FSA:
+	def kleene_closure(self) -> FSA:
 		""" compute the Kleene closure of the FSA """
 
 		# Homework 1: Question 4
@@ -277,6 +289,11 @@ class FSA:
 		""" computes the edge marginals μ(q→q') """
 
 		# Homework 2: Question 2
+		raise NotImplementedError
+
+
+	def coaccessible_intersection(self, fsa):
+		# Homework 2: Question 3
 		raise NotImplementedError
 
 	def intersect(self, fsa):
@@ -330,6 +347,12 @@ class FSA:
 					PairState(q1, q2), w=self_finals[q1] * fsa_finals[q2])
 
 		return product_fsa
+
+	def topologically_equivalent(self, fsa):
+		""" Tests topological equivalence. """
+		
+		# Homework 5: Question 4
+		raise NotImplementedError
 
 	def tikz(self, max_per_row=4):
 

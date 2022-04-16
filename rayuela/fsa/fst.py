@@ -84,9 +84,9 @@ class FST(FSA):
 		raise NotImplementedError
 
 	def top_compose(self, fst):
-		# Homework 3 
+		# Homework 3: Question 3
 		raise NotImplementedError
 
 	def bottom_compose(self, fst):
-		# Homework 3
+		# Homework 3: Question 3
 		raise NotImplementedError

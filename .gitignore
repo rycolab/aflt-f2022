@@ -1,0 +1,12 @@
+# Files
+testing.ipynb
+autograding_tests/generate_pickles.py
+# Other
+__pycache__
+.ipynb_checkpoints
+notebooks/.ipynb_checkpoints
+rayuela.egg-info
+.idea
+.DS_Store
+.vscode
+/data

@@ -1,0 +1,21 @@
+on:
+    # cronjob trigger
+  schedule:
+  - cron:  "0 2 * * 0"
+  # manual trigger
+  workflow_dispatch:
+jobs:
+  repo-sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      # To use this repository's private action, you must check out the repository
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: actions-template-sync
+        uses: AndreasAugustin/actions-template-sync@v0.3.0-draft
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          source_repo_path:  rycolab/aflt-f2022
+          upstream_branch: main # defaults to main
+          pr_labels: enhancement
