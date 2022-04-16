@@ -33,10 +33,25 @@ class Transformer:
             yield sym, PowerState([t for (_, _, t, _) in arcs], weights), sym2sum[sym]
 
     def push(fsa):
-        raise NotImplementedError
+        from rayuela.fsa.pathsum import Strategy
+        W = Pathsum(fsa).backward(Strategy.LEHMANN)
+        return Transformer._push(fsa, W)
 
     def _push(fsa, V):
-        raise NotImplementedError
+        """
+        Mohri (2001)'s weight pushing algorithm. See Eqs 1, 2, 3.
+        Link: https://www.isca-speech.org/archive_v0/archive_papers/eurospeech_2001/e01_1603.pdf.
+        """
+
+        pfsa = fsa.spawn()
+        for i in fsa.Q:
+            pfsa.set_I(i, fsa.λ[i] * V[i])
+            pfsa.set_F(i, ~V[i] * fsa.ρ[i])
+            for a, j, w in fsa.arcs(i):
+                pfsa.add_arc(i, a, j, ~V[i] * w * V[j])
+
+        assert pfsa.pushed # sanity check
+        return pfsa
 
     def _eps_partition(fsa):
         """ partition fsa into two (one with eps arcs and one with all others) """

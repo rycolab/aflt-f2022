@@ -41,7 +41,7 @@ class FST(FSA):
 		if not isinstance(i, State): i = State(i)
 		if not isinstance(j, State): j = State(j)
 		if not isinstance(a, Sym): a = Sym(a)
-		if not isinstance(a, Sym): b = Sym(b)
+		if not isinstance(b, Sym): b = Sym(b)
 		if not isinstance(w, self.R): w = self.R(w)
 
 		self.add_states([i, j])
@@ -53,7 +53,7 @@ class FST(FSA):
 		if not isinstance(i, State): i = State(i)
 		if not isinstance(j, State): j = State(j)
 		if not isinstance(a, Sym): a = Sym(a)
-		if not isinstance(a, Sym): b = Sym(b)
+		if not isinstance(b, Sym): b = Sym(b)
 		if not isinstance(w, self.R): w = self.R(w)
 
 		self.add_states([i, j])
