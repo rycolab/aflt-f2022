@@ -13,24 +13,21 @@ class Transformer:
     def trim(fsa):
         raise NotImplementedError
 
-    def powerarcs(fsa, powerstate):
-        """
-        This helper method group outgoing arcs for determinization.
-        """
-        zero, one = fsa.R.zero, fsa.R.one
-        sym2arc, sym2sum = dd(list), fsa.R.chart()
+    def _powerarcs(fsa, Q):
+        """ This helper method group outgoing arcs for determinization. """
 
-        for s in powerstate.idx:
-            for sym, t, w in fsa.arcs(s):
-                sym2arc[sym].append((s, sym, t, w))
-                sym2sum[sym] += powerstate.weights[s] * w
+        symbol2arcs, unnormalized_residuals = dd(set), fsa.R.chart()
 
-        for sym, arcs in sym2arc.items():
-            weights = fsa.R.chart()
-            for (s, sym, t, w) in arcs:
-                weights[t] += powerstate.weights[s] * w / sym2sum[sym]
+        for q, old_residual in Q.residuals.items():
+            for a, p, w in fsa.arcs(q):
+                symbol2arcs[a].add(p)
+                unnormalized_residuals[(a, p)] += old_residual * w
 
-            yield sym, PowerState([t for (_, _, t, _) in arcs], weights), sym2sum[sym]
+        for a, ps in symbol2arcs.items():
+            normalizer = sum([unnormalized_residuals[(a, p)] for p in ps], start=fsa.R.zero)
+            residuals = {p : ~normalizer * unnormalized_residuals[(a, p)] for p in ps}
+
+            yield a, PowerState(residuals), normalizer
 
     def push(fsa):
         from rayuela.fsa.pathsum import Strategy
