@@ -7,7 +7,7 @@ from itertools import product
 from collections import Counter
 from collections import defaultdict as dd
 
-from rayuela.base.semiring import Boolean, String, ProductSemiring
+from rayuela.base.semiring import Boolean, Real, String, ProductSemiring
 from rayuela.base.misc import epsilon_filter
 from rayuela.base.symbol import Sym, ε, ε_1, ε_2
 
@@ -285,7 +285,7 @@ class FSA:
 		pathsum = Pathsum(self)
 		return pathsum.pathsum(strategy)
 
-	def edge_marginals(self) -> dict:
+	def edge_marginals(self) -> dd[dd[dd[Real]]]:
 		""" computes the edge marginals μ(q→q') """
 
 		# Homework 2: Question 2
