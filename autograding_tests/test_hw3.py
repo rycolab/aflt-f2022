@@ -45,7 +45,7 @@ def test_kosajaru():
         sccs = pickle.load(f)
     for fsa, scc in zip(fsas, sccs):
         sccs_fsa = SCC(fsa)
-        assert list(sccs_fsa.scc()) == list(scc.scc())
+        assert list(sccs_fsa.scc()) == scc
 
 
 def test_decomposed_lehman_example():
