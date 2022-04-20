@@ -185,23 +185,26 @@ class Pathsum:
 		raise NotImplementedError
 
 	def viterbi_bwd(self):
-		""" The Viterbi algorithm run backwards. """
+		""" The Viterbi algorithm run backwards"""
 
 		assert self.fsa.acyclic
+
+		# Trimmed fsa
+		fsa = self.fsa.trim()
 
 		# chart
 		𝜷 = self.R.chart()
 
 		# base case (paths of length 0)
-		for q, w in self.fsa.F:
+		for q, w in fsa.F:
 			𝜷[q] = w
 
 		# recursion
-		for p in self.fsa.toposort(rev=True):
-			for _, q, w in self.fsa.arcs(p):
+		for p in fsa.toposort(rev=True):
+			for _, q, w in fsa.arcs(p):
 				𝜷[p] += 𝜷[q] * w
 
-		return frozendict(𝜷)
+		return 𝜷
 
 	def dijkstra_early(self):
 		""" Dijkstra's algorithm with early stopping."""
