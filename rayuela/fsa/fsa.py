@@ -54,6 +54,8 @@ class FSA:
 		self.ρ = R.chart()
 
 	def add_state(self, q):
+		if not isinstance(q, State):
+			q = State(q)
 		self.Q.add(q)
 
 	def add_states(self, Q):
@@ -63,8 +65,6 @@ class FSA:
 	def add_arc(self, i, a, j, w=None):
 		if w is None: w = self.R.one
 
-		if not isinstance(i, State): i = State(i)
-		if not isinstance(j, State): j = State(j)
 		if not isinstance(a, Sym): a = Sym(a)
 		if not isinstance(w, self.R): w = self.R(w)
 
