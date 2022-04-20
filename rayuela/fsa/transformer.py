@@ -13,30 +13,42 @@ class Transformer:
     def trim(fsa):
         raise NotImplementedError
 
-    def powerarcs(fsa, powerstate):
-        """
-        This helper method group outgoing arcs for determinization.
-        """
-        zero, one = fsa.R.zero, fsa.R.one
-        sym2arc, sym2sum = dd(list), fsa.R.chart()
+    def _powerarcs(fsa, Q):
+        """ This helper method group outgoing arcs for determinization. """
 
-        for s in powerstate.idx:
-            for sym, t, w in fsa.arcs(s):
-                sym2arc[sym].append((s, sym, t, w))
-                sym2sum[sym] += powerstate.weights[s] * w
+        symbol2arcs, unnormalized_residuals = dd(set), fsa.R.chart()
 
-        for sym, arcs in sym2arc.items():
-            weights = fsa.R.chart()
-            for (s, sym, t, w) in arcs:
-                weights[t] += powerstate.weights[s] * w / sym2sum[sym]
+        for q, old_residual in Q.residuals.items():
+            for a, p, w in fsa.arcs(q):
+                symbol2arcs[a].add(p)
+                unnormalized_residuals[(a, p)] += old_residual * w
 
-            yield sym, PowerState([t for (_, _, t, _) in arcs], weights), sym2sum[sym]
+        for a, ps in symbol2arcs.items():
+            normalizer = sum([unnormalized_residuals[(a, p)] for p in ps], start=fsa.R.zero)
+            residuals = {p : ~normalizer * unnormalized_residuals[(a, p)] for p in ps}
+
+            yield a, PowerState(residuals), normalizer
 
     def push(fsa):
-        raise NotImplementedError
+        from rayuela.fsa.pathsum import Strategy
+        W = Pathsum(fsa).backward(Strategy.LEHMANN)
+        return Transformer._push(fsa, W)
 
     def _push(fsa, V):
-        raise NotImplementedError
+        """
+        Mohri (2001)'s weight pushing algorithm. See Eqs 1, 2, 3.
+        Link: https://www.isca-speech.org/archive_v0/archive_papers/eurospeech_2001/e01_1603.pdf.
+        """
+
+        pfsa = fsa.spawn()
+        for i in fsa.Q:
+            pfsa.set_I(i, fsa.λ[i] * V[i])
+            pfsa.set_F(i, ~V[i] * fsa.ρ[i])
+            for a, j, w in fsa.arcs(i):
+                pfsa.add_arc(i, a, j, ~V[i] * w * V[j])
+
+        assert pfsa.pushed # sanity check
+        return pfsa
 
     def _eps_partition(fsa):
         """ partition fsa into two (one with eps arcs and one with all others) """
