@@ -1,9 +1,10 @@
+from collections import defaultdict
 import numpy as np
 from numpy import linalg as LA
 from frozendict import frozendict
 
 from rayuela.base.datastructures import PriorityQueue
-from rayuela.base.semiring import Real
+from rayuela.base.semiring import Real, Semiring
 
 from rayuela.fsa.state import State
 
@@ -179,12 +180,12 @@ class Pathsum:
 			pathsum += self.fsa.λ[q] * 𝜷[q]
 		return pathsum
 
-	def viterbi_fwd(self):
+	def viterbi_fwd(self) -> "defaultdict[State, Semiring]":
 		
 		# Homework 2: Question 2
 		raise NotImplementedError
 
-	def viterbi_bwd(self):
+	def viterbi_bwd(self) -> "defaultdict[State, Semiring]":
 		""" The Viterbi algorithm run backwards"""
 
 		assert self.fsa.acyclic
@@ -288,7 +289,7 @@ class Pathsum:
 	def lehmann_fwd(self): return self.allpairs_fwd(self.lehmann())
 	def lehmann_bwd(self): return self.allpairs_bwd(self.lehmann())
 
-	def decomposed_lehmann_pathsum(self):
+	def decomposed_lehmann_pathsum(self) -> Semiring:
 		# Homework 3: Question 4
 		raise NotImplementedError
 

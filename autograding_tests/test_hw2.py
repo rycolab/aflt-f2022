@@ -21,7 +21,14 @@ def test_viterbi_fwd():
     # Viterbi needs acyclic fsa
     acyclic_fsas = [fsa for fsa in fsas if fsa.acyclic]
     for fsa, a in zip(acyclic_fsas, α):
-        assert Pathsum(fsa).forward(Strategy.VITERBI) == a
+        alpha = Pathsum(fsa).forward(Strategy.VITERBI)
+
+        # Assert both have the same keys
+        assert set(alpha.keys()) == set(a.keys())
+
+        # Assert all values are similar
+        for key in alpha.keys():
+            assert np.allclose(float(alpha[key]),float(a[key]), atol=1e-3)
 
 def test_edge_marginals():
     
@@ -31,4 +38,24 @@ def test_edge_marginals():
     # Viterbi needs acyclic fsa
     acyclic_fsas = [fsa for fsa in fsas if fsa.acyclic]
     for fsa, marginal in zip(acyclic_fsas, marginals):
-        assert fsa.edge_marginals() == marginal
+        computed_marginals = fsa.edge_marginals()
+        
+        #Assert both have the same qs
+        assert set(computed_marginals.keys()) == set(marginal.keys())
+
+        for q in marginal.keys():
+            
+            #Assert every state has the same labels
+            assert set(computed_marginals[q].keys()) == set(marginal[q].keys()) 
+
+            for a in marginal[q].keys():
+
+                #Assert every label goes to the same states
+                assert set(computed_marginals[q][a].keys()) == set(marginal[q][a].keys())
+
+                for q_prima in marginal[q][a]:
+
+                    #Assert alpha values are close enough
+                    assert np.allclose(float(marginal[q][a][q_prima]),float(computed_marginals[q][a][q_prima]), atol=1e-3)
+
+

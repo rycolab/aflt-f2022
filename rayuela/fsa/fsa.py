@@ -161,11 +161,11 @@ class FSA:
 		from rayuela.fsa.transformer import Transformer
 		return Transformer.push(self)
 
-	def determinize(self, strategy=None):
+	def determinize(self, strategy=None) -> FSA:
 		# Homework 4: Question 4
 		raise NotImplementedError
 
-	def minimize(self, strategy=None):
+	def minimize(self, strategy=None) -> FSA:
 		# Homework 5: Question 3
 		raise NotImplementedError
 
@@ -292,7 +292,7 @@ class FSA:
 		raise NotImplementedError
 
 
-	def coaccessible_intersection(self, fsa):
+	def coaccessible_intersection(self, fsa) -> FSA:
 		# Homework 2: Question 3
 		raise NotImplementedError
 
@@ -348,7 +348,7 @@ class FSA:
 
 		return product_fsa
 
-	def topologically_equivalent(self, fsa):
+	def topologically_equivalent(self, fsa) -> bool:
 		""" Tests topological equivalence. """
 		
 		# Homework 5: Question 4
