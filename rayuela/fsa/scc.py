@@ -4,7 +4,6 @@ from numpy import linalg as LA
 from collections import deque
 
 from rayuela.base.semiring import Boolean, Real
-from rayuela.fsa.pathsum import Pathsum, Strategy
 from rayuela.fsa.fsa import FSA
 from rayuela.fsa.state import MinimizeState
 

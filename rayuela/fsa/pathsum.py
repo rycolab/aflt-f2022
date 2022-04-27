@@ -190,19 +190,17 @@ class Pathsum:
 
 		assert self.fsa.acyclic
 
-		# Trimmed fsa
-		fsa = self.fsa.trim()
 
 		# chart
 		𝜷 = self.R.chart()
 
 		# base case (paths of length 0)
-		for q, w in fsa.F:
+		for q, w in self.fsa.F:
 			𝜷[q] = w
 
 		# recursion
-		for p in fsa.toposort(rev=True):
-			for _, q, w in fsa.arcs(p):
+		for p in self.fsa.toposort(rev=True):
+			for _, q, w in self.fsa.arcs(p):
 				𝜷[p] += 𝜷[q] * w
 
 		return 𝜷
@@ -293,22 +291,22 @@ class Pathsum:
 		# Homework 3: Question 4
 		raise NotImplementedError
 
-	def bellmanford_pathsum(self):
+	def bellmanford_pathsum(self) -> Semiring:
 		pathsum = self.R.zero
 		𝜷 = self.bellmanford_bwd()
 		for q in self.fsa.Q:
 			pathsum += self.fsa.λ[q] * 𝜷[q]
 		return pathsum
 
-	def bellmanford_fwd(self):
+	def bellmanford_fwd(self) -> frozendict[State, Semiring]:
 		raise NotImplementedError
 
 
-	def bellmanford_bwd(self):
+	def bellmanford_bwd(self) -> frozendict[State, Semiring]:
 		raise NotImplementedError
 
 
-	def johnson(self):
+	def johnson(self) -> "defaultdict[(State,State), Semiring]":
 		raise NotImplementedError
 
 	def johnson_pathsum(self): return self.allpairs_pathsum(self.johnson())

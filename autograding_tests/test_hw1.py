@@ -3,21 +3,14 @@ import pickle
 from rayuela.base.semiring import Tropical, Real
 from rayuela.fsa.state import PairState, State
 from rayuela.base.symbol import Sym, ε
-import numpy as np
+from rayuela.base.misc import compare_fsas
 
 
 # TODO: 
 # - More examples
 # - Edge cases
 # - Extend random machines to other semirings
-def is_pathsum_positive(fsa: FSA):
-    return fsa.pathsum() > fsa.R.zero
 
-def compare_fsas(original_fsa: FSA, student_fsa: FSA) -> bool:
-    if is_pathsum_positive(original_fsa):
-        return np.allclose(float(original_fsa.pathsum()), float(student_fsa.pathsum()), atol=1e-3)
-    # Skip non-convergent pathsums
-    return True
 
 
 pickles_path = "autograding_tests/pickles"

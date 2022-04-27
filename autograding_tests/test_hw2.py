@@ -5,6 +5,7 @@ from rayuela.fsa.state import PairState, State
 from rayuela.base.symbol import Sym, ε
 import numpy as np
 from rayuela.fsa.pathsum import Pathsum, Strategy
+from rayuela.base.misc import compare_charts
 
 pickles_path = "autograding_tests/pickles"
 hw_path = pickles_path + "/hw2"
@@ -23,12 +24,7 @@ def test_viterbi_fwd():
     for fsa, a in zip(acyclic_fsas, α):
         alpha = Pathsum(fsa).forward(Strategy.VITERBI)
 
-        # Assert both have the same keys
-        assert set(alpha.keys()) == set(a.keys())
-
-        # Assert all values are similar
-        for key in alpha.keys():
-            assert np.allclose(float(alpha[key]),float(a[key]), atol=1e-3)
+        assert compare_charts(a,alpha)
 
 def test_edge_marginals():
     

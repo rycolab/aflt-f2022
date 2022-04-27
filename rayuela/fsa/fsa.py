@@ -161,7 +161,7 @@ class FSA:
 		from rayuela.fsa.transformer import Transformer
 		return Transformer.push(self)
 
-	def determinize(self, strategy=None) -> FSA:
+	def determinize(self) -> FSA:
 		# Homework 4: Question 4
 		raise NotImplementedError
 
@@ -348,8 +348,8 @@ class FSA:
 
 		return product_fsa
 
-	def topologically_equivalent(self, fsa) -> bool:
-		""" Tests topological equivalence. """
+	def equivalent(self, fsa) -> bool:
+		""" Tests equivalence. """
 		
 		# Homework 5: Question 4
 		raise NotImplementedError

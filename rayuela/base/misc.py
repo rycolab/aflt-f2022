@@ -101,6 +101,33 @@ def epsilon_filter(a1, a2, q3):
     else:
         return State('⊥')
 
+def is_pathsum_positive(fsa):
+    from rayuela.fsa.fsa import FSA
+    assert isinstance(fsa, FSA)
+    
+    return fsa.pathsum() > fsa.R.zero
+
+def compare_fsas(original_fsa, student_fsa) -> bool:
+    from rayuela.fsa.fsa import FSA
+    assert isinstance(original_fsa, FSA)
+    assert isinstance(student_fsa, FSA)
+
+    if is_pathsum_positive(original_fsa):
+        return np.allclose(float(original_fsa.pathsum()), float(student_fsa.pathsum()), atol=1e-3)
+    # Skip non-convergent pathsums
+    return True
+
+
+def compare_charts(chart1, chart2) -> "tuple[bool,bool]":
+    # Assert both have the same keys
+    same_keys =  set(chart1.keys()) == set(chart2.keys())
+
+    # Assert all values are similar
+    same_values = False
+    if same_keys:
+        same_values = all([np.allclose(float(chart1[key]),float(chart2[key]), atol=1e-3) for key in chart1.keys()])
+
+    return same_keys and same_values
 
 def compare_chart(semiring, chart1, chart2):
     for item in set(chart1.keys()).intersection(set(chart2.keys())):

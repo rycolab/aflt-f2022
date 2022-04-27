@@ -81,7 +81,7 @@ class MinimizeState(State):
 			return f'{self.label}'
 		contents = []
 		for state in self.idx:
-			contents.append(f"{state.idx}")
+			contents.append(f"{state}")
 		return "{" + ",".join(contents) + "}"
 
 	def __str__(self):
