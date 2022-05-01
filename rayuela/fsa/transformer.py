@@ -47,7 +47,6 @@ class Transformer:
             for a, j, w in fsa.arcs(i):
                 pfsa.add_arc(i, a, j, ~V[i] * w * V[j])
 
-        assert pfsa.pushed # sanity check
         return pfsa
 
     def _eps_partition(fsa):
