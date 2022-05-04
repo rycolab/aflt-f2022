@@ -113,8 +113,9 @@ def compare_fsas(original_fsa, student_fsa) -> bool:
     assert isinstance(student_fsa, FSA)
 
     if is_pathsum_positive(original_fsa):
+        # TODO: Change check for: there is no an arbitrary number of initial states
         same_number_initial_states = len(list(original_fsa.I)) == len(list(student_fsa.I))
-        return np.allclose(float(original_fsa.pathsum()), float(student_fsa.pathsum()), atol=1e-3) and same_number_initial_states
+        return np.allclose(float(original_fsa.pathsum()), float(student_fsa.pathsum()), atol=1e-3) # and same_number_initial_states --> This would break some correct implementations
     # Skip non-convergent pathsums
     return True
 
