@@ -113,9 +113,27 @@ def compare_fsas(original_fsa, student_fsa) -> bool:
     assert isinstance(student_fsa, FSA)
 
     if is_pathsum_positive(original_fsa):
-        return np.allclose(float(original_fsa.pathsum()), float(student_fsa.pathsum()), atol=1e-3)
+        same_number_initial_states = len(list(original_fsa.I)) == len(list(student_fsa.I))
+        return np.allclose(float(original_fsa.pathsum()), float(student_fsa.pathsum()), atol=1e-3) and same_number_initial_states
     # Skip non-convergent pathsums
     return True
+
+def components_to_list(components):
+    return [list(component)[0] for component in components]
+
+def is_topologically_sorted_list(states_list, fsa):
+    while len(states_list)>1:
+        q = states_list.pop(0)
+        for _, q_prime, _ in fsa.arcs(q):
+            if not q_prime in states_list:
+                return False
+    return not list(fsa.arcs(states_list.pop(0)))
+
+def same_number_of_arcs(fsa1, fsa2):
+    n1 = sum([len(list(fsa1.arcs(q))) for q in fsa1.Q])
+    n2 = sum([len(list(fsa2.arcs(q))) for q in fsa2.Q])
+
+    return n1 == n2
 
 
 def compare_charts(chart1, chart2) -> "tuple[bool,bool]":

@@ -5,7 +5,7 @@ from rayuela.fsa.state import PairState, State
 from rayuela.base.symbol import Sym, ε
 import numpy as np
 from rayuela.fsa.pathsum import Pathsum, Strategy
-from rayuela.base.misc import compare_charts
+from rayuela.base.misc import compare_charts, compare_fsas
 
 pickles_path = "autograding_tests/pickles"
 hw_path = pickles_path + "/hw2"
@@ -55,3 +55,16 @@ def test_edge_marginals():
                     assert np.allclose(float(marginal[q][a][q_prima]),float(computed_marginals[q][a][q_prima]), atol=1e-3)
 
 
+def test_coaccessible_intersection():
+
+    left_fsas, right_fsas = fsas[:500], fsas[500:]
+
+    for left, right in zip(left_fsas, right_fsas):
+        intersected_fsas = left.intersect(right)
+        coaccessible_intersected = left.coaccessible_intersection(right)
+
+        #fsas have same pathsum
+        assert compare_fsas(intersected_fsas, coaccessible_intersected)
+
+        #only coaccesible states
+        assert coaccessible_intersected.Q == coaccessible_intersected.coaccessible()

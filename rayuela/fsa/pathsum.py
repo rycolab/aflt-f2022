@@ -298,11 +298,11 @@ class Pathsum:
 			pathsum += self.fsa.λ[q] * 𝜷[q]
 		return pathsum
 
-	def bellmanford_fwd(self) -> frozendict[State, Semiring]:
+	def bellmanford_fwd(self) -> "frozendict[State, Semiring]":
 		raise NotImplementedError
 
 
-	def bellmanford_bwd(self) -> frozendict[State, Semiring]:
+	def bellmanford_bwd(self) -> "frozendict[State, Semiring]":
 		raise NotImplementedError
 
 

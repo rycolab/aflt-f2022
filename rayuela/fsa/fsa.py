@@ -285,7 +285,7 @@ class FSA:
 		pathsum = Pathsum(self)
 		return pathsum.pathsum(strategy)
 
-	def edge_marginals(self) -> dd[dd[dd[Semiring]]]:
+	def edge_marginals(self) -> "dd[dd[dd[Semiring]]]":
 		""" computes the edge marginals μ(q→q') """
 
 		# Homework 2: Question 2

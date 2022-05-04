@@ -1,3 +1,4 @@
+from rayuela.base.misc import components_to_list, is_topologically_sorted_list
 from rayuela.fsa.fsa import FSA
 from rayuela.base.semiring import Tropical, Real
 from rayuela.fsa.state import PairState, State
@@ -38,15 +39,38 @@ def test_kosajaru_example():
                 frozenset({State(8)})]
     sccs = SCC(fsa)
 
-    assert components == list(sccs.scc())
+    gt = components_to_list(components)
+    computed = components_to_list(list(sccs.scc()))
+    
+    # All elements are present
+    assert all([elem in gt for elem in computed]) and all([elem in computed for elem in gt])
+    # Computed components are topologically sorted
+    assert is_topologically_sorted_list(computed, fsa)
+
+    
     
     
 def test_kosajaru():
     with open(f"{hw_path}/sccs.pkl", 'rb') as f:
         sccs = pickle.load(f)
     for fsa, scc in zip(fsas, sccs):
+        
+        # Only tested for acyclic fsas. Will be updated in future versions.
+        if not fsa.acyclic:
+            continue
         sccs_fsa = SCC(fsa)
-        assert list(sccs_fsa.scc()) == scc
+
+        gt = components_to_list(scc)
+        computed = components_to_list(list(sccs_fsa.scc()))
+        
+
+        # All elements are present
+        assert all([elem in gt for elem in computed]) and all([elem in computed for elem in gt])
+
+        # Computed components are topologically sorted
+        assert is_topologically_sorted_list(computed, fsa)
+
+        
 
 
 def test_decomposed_lehman_example():
