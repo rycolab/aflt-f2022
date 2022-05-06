@@ -7,6 +7,11 @@ The goal of this document is to provide an overview of all the changes that have
 - HW3, Q3 test
 - HW5, Q3 proper test
 
+## 06/05
+- Added top composition test
+- Improved equivalence test to reduce testing time and avoid infinite loops.
+- Added reveser string test.
+
 ## 03/05 
 
 - Fixed kleene closure bug in gold fsas
