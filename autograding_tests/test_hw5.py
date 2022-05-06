@@ -89,39 +89,20 @@ def test_minimization_example():
 def test_weighted_equivalence():
     # pass a bunch of previous tests using the equivalet method instead of comparing the pathsums
     
-    with open(f"{pickles_path}/fsas.pkl", 'rb') as f:
-        fsas = pickle.load(f)
-    # HW1
-
-    hw_path = pickles_path + "/hw1"
-    # Reversed fsas
-    with open(f"{hw_path}/reversed_fsas.pkl", 'rb') as f:
-        reversed_fsas = pickle.load(f)
     
-    for fsa, rfsa in zip(fsas, reversed_fsas):
+    with open(f"{hw_path}/equivalence.pkl", 'rb') as f:
+        equivalents = pickle.load(f)
+    
+    for fsa, rfsa in zip(*equivalents['reverse']):
         assert rfsa.equivalent(fsa.reverse())
-
-    # Union
-    with open(f"{hw_path}/union_fsas.pkl", 'rb') as f:
-        union_fsas = pickle.load(f)
     
-    middle = int(len(fsas)/2)
-    for left_fsa, right_fsa, union_fsa in zip(fsas[:middle], fsas[middle:], union_fsas):
+    for (left_fsa, right_fsa), union_fsa in zip(*equivalents['union']):
         assert union_fsa.equivalent(left_fsa.union(right_fsa))
 
-    # Concat
-    with open(f"{hw_path}/concat_fsas.pkl", 'rb') as f:
-        concat_fsas = pickle.load(f)
-    
-    middle = int(len(fsas)/2)
-    for left_fsa, right_fsa, concat_fsa in zip(fsas[:middle], fsas[middle:], concat_fsas):
+    for (left_fsa, right_fsa), concat_fsa in zip(*equivalents['concat']):
         assert concat_fsa.equivalent(left_fsa.concatenate(right_fsa))
 
-    # Kleene closure
-    with open(f"{hw_path}/kleene_fsas.pkl", 'rb') as f:
-        kleene_fsas = pickle.load(f)
-    
-    for fsa, kleene in zip(fsas, kleene_fsas):
+    for fsa, kleene in zip(*equivalents['kleene']):
         assert kleene.equivalent(fsa.kleene_closure())
 
         
