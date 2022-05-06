@@ -4,8 +4,11 @@ The goal of this document is to provide an overview of all the changes that have
 
 
 ## Remaining
-- HW3, Q3 test
+- HW3, Q3 proper test
 - HW5, Q3 proper test
+- Johnson test bug
+- Johnson test with negative weigths
+- Improve Kosajaru tests
 
 ## 06/05
 - Added top composition test
