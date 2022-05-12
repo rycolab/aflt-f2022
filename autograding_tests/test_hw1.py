@@ -70,9 +70,7 @@ FSA2.add_F(State(2), w=Real(0.062))
 def test_deterministic():
     with open(f"{hw_path}/deterministic_results.pkl", 'rb') as f:
         deterministic_results = pickle.load(f)
-    with open(f"{hw_path}/deterministic_fsas.pkl", 'rb') as f:
-        dfsas = pickle.load(f)
-    for fsa, result in zip(dfsas, deterministic_results):
+    for fsa, result in zip(fsas, deterministic_results):
         assert fsa.deterministic == result
 
 

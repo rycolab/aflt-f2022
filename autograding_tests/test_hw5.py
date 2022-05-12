@@ -37,7 +37,7 @@ def test_johnson():
 def test_minimization():
     pass
 
-def test_minimization_example():
+def test_minimization_example_1():
     fsa = FSA(R=Boolean)
     fsa.set_I(State("a"), w=Boolean(True))
 
@@ -50,20 +50,13 @@ def test_minimization_example():
     fsa.add_arc(State("b"), 1, State("a"), w=Boolean(True))
 
     # arcs from state c
-    fsa.add_arc(State("c"), 2, State("f"), w=Boolean(True))
     fsa.add_arc(State("c"), 1, State("e"), w=Boolean(True))
 
     # arcs from state d
-    fsa.add_arc(State("d"), 2, State("f"), w=Boolean(True))
     fsa.add_arc(State("d"), 1, State("e"), w=Boolean(True))
-
-    # arcs from state f
-    fsa.add_arc(State("f"), 2, State("f"), w=Boolean(True))
-    fsa.add_arc(State("f"), 1, State("f"), w=Boolean(True))
 
     # arcs from state e
     fsa.add_arc(State("e"), 1, State("e"), w=Boolean(True))
-    fsa.add_arc(State("e"), 2, State("f"), w=Boolean(True))
 
     # add final states
     fsa.add_F(State("c"), w=Boolean(True))
@@ -74,17 +67,174 @@ def test_minimization_example():
 
     MFSA = FSA(R=Boolean)
     MFSA.set_I(MinimizeState([State("b"), State("a")]), w=Boolean(True))
-    MFSA.add_arc(MinimizeState([State("e"), State("c"), State("d")]), 2, MinimizeState([State("f")]), w=Boolean(True))
     MFSA.add_arc(MinimizeState([State("e"), State("c"), State("d")]), 1, MinimizeState([State("e"), State("c"), State("d")]), w=Boolean(True))
-    MFSA.add_arc(MinimizeState([State("f")]), 2, MinimizeState([State("f")]), w=Boolean(True))
-    MFSA.add_arc(MinimizeState([State("f")]), 1, MinimizeState([State("f")]), w=Boolean(True))
-    MFSA.add_arc(MinimizeState([State("b"), State("a")]), 1, MinimizeState([State("b"), State("a")]), w=Boolean(True))
     MFSA.add_arc(MinimizeState([State("b"), State("a")]), 2, MinimizeState([State("e"), State("c"), State("d")]), w=Boolean(True))
+    MFSA.add_arc(MinimizeState([State("b"), State("a")]), 1, MinimizeState([State("b"), State("a")]), w=Boolean(True))
     # add final states
     MFSA.add_F(MinimizeState([State("e"), State("c"), State("d")]), w=Boolean(True))
+
     
     assert len(mfsa.Q) == len(MFSA.Q) 
     assert same_number_of_arcs(mfsa, MFSA)
+
+def test_minimization_example_2():
+    
+    """
+    Test case from Revuz (1991)
+    """
+
+    fsa = FSA(Boolean)
+    fsa.set_I(State(1), Boolean(True))
+
+    fsa.add_arc(State(1), "a", State(2), Boolean(True))
+    fsa.add_arc(State(1), "b", State(3), Boolean(True))
+    fsa.add_arc(State(1), "c", State(4), Boolean(True))
+
+    fsa.add_arc(State(2), "a", State(5), Boolean(True))
+    fsa.add_arc(State(2), "b", State(6), Boolean(True))
+
+    fsa.add_arc(State(3), "a", State(10), Boolean(True))
+    fsa.add_arc(State(3), "b", State(7), Boolean(True))
+
+    fsa.add_arc(State(4), "a", State(8), Boolean(True))
+    fsa.add_arc(State(4), "b", State(9), Boolean(True))
+
+    fsa.add_arc(State(5), "a", State(15), Boolean(True))
+    fsa.add_arc(State(5), "b", State(10), Boolean(True))
+
+    fsa.add_arc(State(6), "a", State(10), Boolean(True))
+    fsa.add_arc(State(6), "b", State(11), Boolean(True))
+
+    fsa.add_arc(State(7), "a", State(10), Boolean(True))
+    fsa.add_arc(State(7), "b", State(11), Boolean(True))
+
+    fsa.add_arc(State(8), "a", State(12), Boolean(True))
+
+    fsa.add_arc(State(9), "a", State(12), Boolean(True))
+    fsa.add_arc(State(9), "b", State(15), Boolean(True))
+
+    fsa.add_arc(State(10), "a", State(13), Boolean(True))
+    fsa.add_arc(State(10), "b", State(15), Boolean(True))
+
+    fsa.add_arc(State(11), "a", State(13), Boolean(True))
+
+    fsa.add_arc(State(12), "a", State(14), Boolean(True))
+    fsa.add_arc(State(12), "c", State(15), Boolean(True))
+
+    fsa.add_arc(State(13), "b", State(15), Boolean(True))
+
+    fsa.add_arc(State(14), "d", State(15), Boolean(True))
+
+    fsa.add_F(State(15), Boolean(True))
+
+    mfsa = FSA(Boolean)
+    mfsa.add_arc(MinimizeState([State(2)]), 'a', MinimizeState([State(5)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(2)]), 'b', MinimizeState([State(6), State(7)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(11)]), 'a', MinimizeState([State(13)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(14)]), 'd', MinimizeState([State(15)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(9)]), 'a', MinimizeState([State(12)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(9)]), 'b', MinimizeState([State(15)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(6), State(7)]), 'a', MinimizeState([State(10)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(6), State(7)]), 'b', MinimizeState([State(11)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(8)]), 'a', MinimizeState([State(12)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(3)]), 'a', MinimizeState([State(10)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(3)]), 'b', MinimizeState([State(6), State(7)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(10)]), 'a', MinimizeState([State(13)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(10)]), 'b', MinimizeState([State(15)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(1)]), 'a', MinimizeState([State(2)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(1)]), 'b', MinimizeState([State(3)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(1)]), 'c', MinimizeState([State(4)]), Boolean(True))
+    mfsa.set_I(MinimizeState([State(1)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(13)]), 'b', MinimizeState([State(15)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(5)]), 'a', MinimizeState([State(15)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(5)]), 'b', MinimizeState([State(10)]), Boolean(True))
+    mfsa.add_F(MinimizeState([State(15)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(12)]), 'a', MinimizeState([State(14)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(12)]), 'c', MinimizeState([State(15)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(4)]), 'a', MinimizeState([State(8)]), Boolean(True))
+    mfsa.add_arc(MinimizeState([State(4)]), 'b', MinimizeState([State(9)]), Boolean(True))
+
+    assert len(mfsa.Q) == len(fsa.minimize().Q) 
+    assert same_number_of_arcs(mfsa, fsa.minimize())
+
+def test_minimization_example_3():
+
+    """
+    Modified test case from Revuz (1991)
+    """
+
+    fsa = FSA(Boolean)
+    fsa.set_I(State(1), Boolean(True))
+
+    fsa.add_arc(State(1), "a", State(2), Boolean(True))
+    fsa.add_arc(State(1), "b", State(3), Boolean(True))
+    fsa.add_arc(State(1), "c", State(4), Boolean(True))
+
+    fsa.add_arc(State(2), "a", State(5), Boolean(True))
+    fsa.add_arc(State(2), "b", State(6), Boolean(True))
+
+    fsa.add_arc(State(3), "a", State(10), Boolean(True))
+    fsa.add_arc(State(3), "b", State(7), Boolean(True))
+
+    fsa.add_arc(State(4), "a", State(8), Boolean(True))
+    fsa.add_arc(State(4), "b", State(9), Boolean(True))
+
+    # fsa.add_arc(State(5), "a", State(15), Boolean(True))
+    fsa.add_arc(State(5), "b", State(10), Boolean(True))
+
+    # fsa.add_arc(State(6), "a", State(10), Boolean(True))
+    fsa.add_arc(State(6), "b", State(11), Boolean(True))
+
+    fsa.add_arc(State(7), "a", State(10), Boolean(True))
+    fsa.add_arc(State(7), "b", State(11), Boolean(True))
+
+    fsa.add_arc(State(8), "a", State(12), Boolean(True))
+
+    fsa.add_arc(State(9), "a", State(12), Boolean(True))
+
+    fsa.add_arc(State(10), "a", State(13), Boolean(True))
+    fsa.add_arc(State(10), "b", State(15), Boolean(True))
+
+    fsa.add_arc(State(11), "a", State(13), Boolean(True))
+    fsa.add_arc(State(11), "b", State(15), Boolean(True))
+
+    fsa.add_arc(State(12), "a", State(14), Boolean(True))
+    fsa.add_arc(State(12), "c", State(15), Boolean(True))
+
+    fsa.add_arc(State(13), "b", State(15), Boolean(True))
+
+    fsa.add_arc(State(14), "d", State(15), Boolean(True))
+
+    fsa.add_F(State(15), Boolean(True))
+
+    MFSA = FSA(Boolean)
+    MFSA.add_arc(MinimizeState([State(2)]), 'a', MinimizeState([State(5), State(6)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(2)]), 'b', MinimizeState([State(5), State(6)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(14)]), 'd', MinimizeState([State(15)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(8), State(9)]), 'a', MinimizeState([State(12)]), Boolean(True))
+    MFSA.add_F(MinimizeState([State(15)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(7)]), 'a', MinimizeState([State(10), State(11)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(7)]), 'b', MinimizeState([State(10), State(11)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(3)]), 'a', MinimizeState([State(10), State(11)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(3)]), 'b', MinimizeState([State(7)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(1)]), 'a', MinimizeState([State(2)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(1)]), 'b', MinimizeState([State(3)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(1)]), 'c', MinimizeState([State(4)]), Boolean(True))
+    MFSA.set_I(MinimizeState([State(1)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(5), State(6)]), 'b', MinimizeState([State(10), State(11)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(13)]), 'b', MinimizeState([State(15)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(10), State(11)]), 'a', MinimizeState([State(13)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(10), State(11)]), 'b', MinimizeState([State(15)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(12)]), 'a', MinimizeState([State(14)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(12)]), 'c', MinimizeState([State(15)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(4)]), 'a', MinimizeState([State(8), State(9)]), Boolean(True))
+    MFSA.add_arc(MinimizeState([State(4)]), 'b', MinimizeState([State(8), State(9)]), Boolean(True))
+
+    mfsa = fsa.minimize()
+
+    assert len(mfsa.Q) == len(MFSA.Q) 
+    assert same_number_of_arcs(mfsa, MFSA)
+
 
 def test_weighted_equivalence():
     # pass a bunch of previous tests using the equivalet method instead of comparing the pathsums

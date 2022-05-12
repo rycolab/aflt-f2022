@@ -103,14 +103,17 @@ def epsilon_filter(a1, a2, q3):
 
 def is_pathsum_positive(fsa):
     from rayuela.fsa.fsa import FSA
-    assert isinstance(fsa, FSA)
+    from rayuela.fsa.fst import FST
+    assert isinstance(fsa, FSA) or isinstance(fsa, FST)
     
     return fsa.pathsum() > fsa.R.zero
 
 def compare_fsas(original_fsa, student_fsa) -> bool:
     from rayuela.fsa.fsa import FSA
-    assert isinstance(original_fsa, FSA)
-    assert isinstance(student_fsa, FSA)
+    from rayuela.fsa.fst import FST
+
+    assert isinstance(original_fsa, FSA) or isinstance(original_fsa, FST)
+    assert isinstance(student_fsa, FSA)or isinstance(student_fsa, FST)
 
     if is_pathsum_positive(original_fsa):
         # TODO: Change check for: there is no an arbitrary number of initial states
@@ -119,22 +122,68 @@ def compare_fsas(original_fsa, student_fsa) -> bool:
     # Skip non-convergent pathsums
     return True
 
-def components_to_list(components):
-    return [list(component)[0] for component in components]
-
-def is_topologically_sorted_list(states_list, fsa):
-    while len(states_list)>1:
-        q = states_list.pop(0)
-        for _, q_prime, _ in fsa.arcs(q):
-            if not q_prime in states_list:
-                return False
-    return not list(fsa.arcs(states_list.pop(0)))
+def is_topologically_sorted_scc(sccs, fsa, verbose=False):
+    assert fsa.acyclic, "FSA must be acyclic to have a topological order"
+    visited = []
+    if verbose: print(sccs)
+    for component in sccs:
+        for p in component:
+            visited.append(p)
+            for l, q, w in fsa.arcs(p):
+                if verbose: print(p, "->", q)
+                if q in visited:
+                    return False
+                
+    return True
 
 def same_number_of_arcs(fsa1, fsa2):
     n1 = sum([len(list(fsa1.arcs(q))) for q in fsa1.Q])
     n2 = sum([len(list(fsa2.arcs(q))) for q in fsa2.Q])
 
     return n1 == n2
+
+def fsa_to_code(fsa, fsa_name:str):
+    """
+    This function prints the code that produces the given fsa.
+    Currently works for fsas with 'State's and 'MinimizeState's
+    
+    input:
+    -----------
+    - fsa: target fsa
+    - fsa_name: variable name for the fsa
+    """
+    assert isinstance(fsa_name, str), "fsa_name must be a string"
+
+    semiring_class_name = fsa.R.__name__
+    print(f"{fsa_name} = FSA({semiring_class_name})")
+    for q in fsa.Q:
+        state_class_name = type(q).__name__
+        if state_class_name == 'MinimizeState':
+            origin = f"{state_class_name}({[f'State({i})' for i in q.idx]})".replace("'", "")
+            for l, p, w in fsa.arcs(q):
+                target = f"{state_class_name}({[f'State({i})' for i in p.idx]})".replace("'", "")
+                print(f"{fsa_name}.add_arc({origin}, '{l}', {target}, {semiring_class_name}({w}))")
+            for i, w in fsa.I:
+                if q == i:
+                    state = f"{[f'State({i})' for i in q.idx]}".replace("'", "")
+                    print(f"{fsa_name}.set_I({state_class_name}({state}), {semiring_class_name}({w}))")
+            for i, w in fsa.F:
+                if q == i:
+                    state = f"{[f'State({i})' for i in q.idx]}".replace("'", "")
+                    print(f"{fsa_name}.add_F({state_class_name}({state}), {semiring_class_name}({w}))")
+        if state_class_name == 'State':
+            origin = f"{state_class_name}({q})".replace("'", "")
+            for l, p, w in fsa.arcs(q):
+                target = f"{state_class_name}({p})".replace("'", "")
+                print(f"{fsa_name}.add_arc({origin}, '{l}', {target}, {semiring_class_name}({w}))")
+            for i, w in fsa.I:
+                if q == i:
+                    state = f"{q}".replace("'", "")
+                    print(f"{fsa_name}.set_I({state_class_name}({state}), {semiring_class_name}({w}))")
+            for i, w in fsa.F:
+                if q == i:
+                    state = f"{q}".replace("'", "")
+                    print(f"{fsa_name}.add_F({state_class_name}({state}), {semiring_class_name}({w}))")
 
 
 def compare_charts(chart1, chart2) -> "tuple[bool,bool]":
