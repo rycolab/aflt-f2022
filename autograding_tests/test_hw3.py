@@ -217,7 +217,13 @@ def test_composition():
     with open(f"{hw_path}/bottom_composition.pkl", 'rb') as f:
         bottom_composition = pickle.load(f)
 
-    top_compose_works = all([compare_fsas(top, left.top_compose(right)) for top, left, right in top_composition])
-    bottom_compose_works = all([compare_fsas(top, left.bottom_compose(right)) for top, left, right in bottom_composition])
+    try:
+        top_compose_works = all([compare_fsas(top, left.top_compose(right)) for top, left, right in top_composition])
+    except:
+        top_compose_works = False
+    try:
+        bottom_compose_works = all([compare_fsas(top, left.bottom_compose(right)) for top, left, right in bottom_composition])
+    except: 
+        bottom_compose_works = False
 
     assert top_compose_works or bottom_compose_works
