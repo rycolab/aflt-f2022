@@ -26,7 +26,7 @@ def preterminal(p):
     return False
 
 def binarized(p):
-    # X → a
+    # X → Y Z
     (head, body) = p
     if len(body) == 2 and isinstance(p.body[0], NT) and isinstance(p.body[1], NT):
         return True
@@ -57,21 +57,44 @@ class Transformer:
                 ncfg.add(one, p.head, *p.body)
         return ncfg
 
-    def unaryremove(self, cfg) -> CFG:
-        # Assignment 6
-        raise NotImplementedError
+    def _fold(self, cfg, p, w, I):
 
-    def nullaryremove(self, cfg) -> CFG:
-        # Assignment 6
-        raise NotImplementedError
+        # basic sanity checks
+        for (i, j) in I:
+            assert i >= 0 and j >= i and j < len(p.body)
 
-    def separate_terminals(self, cfg) -> CFG:
-        # Assignment 7
-        raise NotImplementedError
+        # new productions
+        P, heads = [], []
+        for (i, j) in I:
+            head = self._gen_nt()
+            heads.append(head)
+            body = p.body[i:j+1]
+            P.append(((head, body), cfg.R.one))
 
-    def binarize(self, cfg) -> CFG:
-        # Assignment 7
-        raise NotImplementedError
+        # new "head" production
+        body = tuple()
+        start = 0
+        for (end, n), head in zip(I, heads):
+            body += p.body[start:end] + (head,)
+            start = n+1
+        body += p.body[start:]
+        P.append(((p.head, body), w))
+
+        return P
+
+    def fold(self, cfg, p, w, I):
+        ncfg = cfg.spawn()
+        add = ncfg.add
+
+        for (q, w) in cfg.P:
+            if p != q:
+                add(w, q.head, *q.body)
+
+        for (head, body), w, in self._fold(cfg, p, w, I):
+            add(w, head, *body)
+
+        ncfg.make_unary_fsa()
+        return ncfg
 
     def cnf(self, cfg):
 
@@ -88,4 +111,20 @@ class Transformer:
         ncfg = self.binarize(ncfg)
 
         return ncfg.trim()
+
+    def unaryremove(self, cfg) -> CFG:
+        # Assignment 6
+        raise NotImplementedError
+
+    def nullaryremove(self, cfg) -> CFG:
+        # Assignment 6
+        raise NotImplementedError
+
+    def separate_terminals(self, cfg) -> CFG:
+        # Assignment 7
+        raise NotImplementedError
+
+    def binarize(self, cfg) -> CFG:
+        # Assignment 7
+        raise NotImplementedError
 
