@@ -8,6 +8,17 @@ The goal of this document is to provide an overview of all the changes that have
 - Johnson test bug
 - Add Johnson test with negative weigths. Blocked by above bug.
 
+## 19/05
+- `_push()` now allows to push any weights. Solves [this issue](https://github.com/rycolab/aflt-f2022/issues/10)
+- Fixed non determinizable fsas in equivalence test, solves division by zero issue
+- Fixed pushed fsas with no initial states
+- Fixed kleene closure example test
+- Fixed issue with kleene closure test generation
+- Test only epsilon free fsas
+
+
+
+
 ## 11/05
 - Minimization test fixed. The fsa was not trimmed.
 - Added more minimization tests
