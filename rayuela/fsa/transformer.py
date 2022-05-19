@@ -32,7 +32,9 @@ class Transformer:
     def push(fsa):
         from rayuela.fsa.pathsum import Strategy
         W = Pathsum(fsa).backward(Strategy.LEHMANN)
-        return Transformer._push(fsa, W)
+        pfsa = Transformer._push(fsa, W)
+        assert pfsa.pushed # sanity check
+        return pfsa
 
     def _push(fsa, V):
         """
@@ -47,7 +49,6 @@ class Transformer:
             for a, j, w in fsa.arcs(i):
                 pfsa.add_arc(i, a, j, ~V[i] * w * V[j])
 
-        assert pfsa.pushed # sanity check
         return pfsa
 
     def _eps_partition(fsa):
