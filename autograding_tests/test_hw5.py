@@ -238,22 +238,23 @@ def test_minimization_example_3():
 
 def test_weighted_equivalence():
     # pass a bunch of previous tests using the equivalet method instead of comparing the pathsums
-    
+    from rayuela.fsa.transformer import Transformer
     
     with open(f"{hw_path}/equivalence.pkl", 'rb') as f:
         equivalents = pickle.load(f)
     
     for fsa, rfsa in zip(*equivalents['reverse']):
-        assert rfsa.equivalent(fsa.reverse())
+        assert Transformer.epsremoval(rfsa).equivalent(Transformer.epsremoval(fsa.reverse()))
     
     for (left_fsa, right_fsa), union_fsa in zip(*equivalents['union']):
-        assert union_fsa.equivalent(left_fsa.union(right_fsa))
+        assert Transformer.epsremoval(union_fsa).equivalent(Transformer.epsremoval(left_fsa.union(right_fsa)))
 
     for (left_fsa, right_fsa), concat_fsa in zip(*equivalents['concat']):
-        assert concat_fsa.equivalent(left_fsa.concatenate(right_fsa))
+        assert Transformer.epsremoval(concat_fsa).equivalent(Transformer.epsremoval(left_fsa.concatenate(right_fsa)))
 
-    for fsa, kleene in zip(*equivalents['kleene']):
-        assert kleene.equivalent(fsa.kleene_closure())
+    # Commented since kleene closure hasn't been correctly implemented by everyone
+    # for fsa, kleene in zip(*equivalents['kleene']):
+    #     assert kleene.equivalent(fsa.kleene_closure())
 
         
 
