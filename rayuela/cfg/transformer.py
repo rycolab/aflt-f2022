@@ -11,47 +11,7 @@ from rayuela.cfg.nonterminal import NT, S, Slash, Other
 from rayuela.cfg.production import Production
 from rayuela.cfg.cfg import CFG
 from rayuela.cfg.treesum import Treesum
-
-def unary(p):
-    # X → Y
-    if len(p.body) == 1 and isinstance(p.body[0], NT):
-        return True
-    return False
-
-def preterminal(p):
-    # X → a
-    (head, body) = p
-    if len(body) == 1 and isinstance(p.body[0], Sym):
-        return True
-    return False
-
-def binarized(p):
-    # X → Y Z
-    (head, body) = p
-    if len(body) == 2 and isinstance(p.body[0], NT) and isinstance(p.body[1], NT):
-        return True
-    return False
-
-def nullary(p):
-    # ε
-    head, body = p
-    if head == S:
-        # When head is S we allow the ε in the body
-        return False
-    for elem in body:
-        if elem == ε:
-            return True
-    return False
-
-def separated(p):
-    (head, body) = p
-    if isinstance(body[0], NT):
-        r = all([isinstance(elem, NT) for elem in body])
-    elif isinstance(body[0], Sym):
-        r = all([isinstance(elem, Sym) for elem in body])
-    else:
-        raise ValueError("Body is neither 'NT' nor 'Sym'")
-    return r
+from rayuela.cfg.misc import *
 
 
 def powerset(iterable):

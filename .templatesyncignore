@@ -2,4 +2,3 @@ rayuela/fsa/fsa.py
 rayuela/fsa/fst.py
 rayuela/fsa/scc.py
 rayuela/fsa/pathsum.py
-rayuela/cfg/transformer.py

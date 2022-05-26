@@ -11,7 +11,8 @@ from rayuela.base.misc import compare_chart
 from rayuela.cfg.production import Production
 from rayuela.cfg.nonterminal import NT, S
 from rayuela.cfg.cfg import CFG
-from rayuela.cfg.transformer import Transformer, binarized, unary, preterminal, separated, nullary
+from rayuela.cfg.transformer import Transformer
+from rayuela.cfg.misc import *
 from rayuela.cfg.treesum import Treesum
 
 pickles_path = "autograding_tests/pickles"
