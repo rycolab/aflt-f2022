@@ -152,38 +152,49 @@ def fsa_to_code(fsa, fsa_name:str):
     - fsa: target fsa
     - fsa_name: variable name for the fsa
     """
+    from rayuela.base.semiring import Count, Integer, Real, Rational, Tropical, Boolean, MaxPlus, String
     assert isinstance(fsa_name, str), "fsa_name must be a string"
+
+    def weight_wrapper(w):
+        """
+        Some semirings like Rational need to pass the weight between quotes
+        """
+        if fsa.R == Rational:
+            return f"'{w}'"
+        else: 
+            return w
 
     semiring_class_name = fsa.R.__name__
     print(f"{fsa_name} = FSA({semiring_class_name})")
+    
     for q in fsa.Q:
         state_class_name = type(q).__name__
         if state_class_name == 'MinimizeState':
             origin = f"{state_class_name}({[f'State({i})' for i in q.idx]})".replace("'", "")
             for l, p, w in fsa.arcs(q):
                 target = f"{state_class_name}({[f'State({i})' for i in p.idx]})".replace("'", "")
-                print(f"{fsa_name}.add_arc({origin}, '{l}', {target}, {semiring_class_name}({w}))")
+                print(f"{fsa_name}.add_arc({origin}, '{l}', {target}, {semiring_class_name}({weight_wrapper(w)}))")
             for i, w in fsa.I:
                 if q == i:
                     state = f"{[f'State({i})' for i in q.idx]}".replace("'", "")
-                    print(f"{fsa_name}.set_I({state_class_name}({state}), {semiring_class_name}({w}))")
+                    print(f"{fsa_name}.set_I({state_class_name}({state}), {semiring_class_name}({weight_wrapper(w)}))")
             for i, w in fsa.F:
                 if q == i:
                     state = f"{[f'State({i})' for i in q.idx]}".replace("'", "")
-                    print(f"{fsa_name}.add_F({state_class_name}({state}), {semiring_class_name}({w}))")
+                    print(f"{fsa_name}.add_F({state_class_name}({state}), {semiring_class_name}({weight_wrapper(w)}))")
         if state_class_name == 'State':
             origin = f"{state_class_name}({q})".replace("'", "")
             for l, p, w in fsa.arcs(q):
                 target = f"{state_class_name}({p})".replace("'", "")
-                print(f"{fsa_name}.add_arc({origin}, '{l}', {target}, {semiring_class_name}({w}))")
+                print(f"{fsa_name}.add_arc({origin}, '{l}', {target}, {semiring_class_name}({weight_wrapper(w)}))")
             for i, w in fsa.I:
                 if q == i:
                     state = f"{q}".replace("'", "")
-                    print(f"{fsa_name}.set_I({state_class_name}({state}), {semiring_class_name}({w}))")
+                    print(f"{fsa_name}.set_I({state_class_name}({state}), {semiring_class_name}({weight_wrapper(w)}))")
             for i, w in fsa.F:
                 if q == i:
                     state = f"{q}".replace("'", "")
-                    print(f"{fsa_name}.add_F({state_class_name}({state}), {semiring_class_name}({w}))")
+                    print(f"{fsa_name}.add_F({state_class_name}({state}), {semiring_class_name}({weight_wrapper(w)}))")
 
 
 def compare_charts(chart1, chart2) -> "tuple[bool,bool]":
