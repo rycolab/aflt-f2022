@@ -32,6 +32,27 @@ def binarized(p):
         return True
     return False
 
+def nullary(p):
+    # ε
+    head, body = p
+    if head == S:
+        # When head is S we allow the ε in the body
+        return False
+    for elem in body:
+        if elem == ε:
+            return True
+    return False
+
+def separated(p):
+    (head, body) = p
+    if isinstance(body[0], NT):
+        r = all([isinstance(elem, NT) for elem in body])
+    elif isinstance(body[0], Sym):
+        r = all([isinstance(elem, Sym) for elem in body])
+    else:
+        raise ValueError("Body is neither 'NT' nor 'Sym'")
+    return r
+
 
 def powerset(iterable):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"

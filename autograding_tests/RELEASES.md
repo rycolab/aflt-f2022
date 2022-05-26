@@ -8,6 +8,11 @@ The goal of this document is to provide an overview of all the changes that have
 - Johnson test bug
 - Add Johnson test with negative weigths. Blocked by above bug.
 
+## 25/05
+
+- Minimization tests examples updated with Rational semiring to avoid numerical issues
+- Tests for hw 6 and hw 7 added
+
 ## 19/05
 - `_push()` now allows to push any weights. Solves [this issue](https://github.com/rycolab/aflt-f2022/issues/10)
 - Fixed non determinizable fsas in equivalence test, solves division by zero issue
