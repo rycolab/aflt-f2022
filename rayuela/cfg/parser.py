@@ -63,3 +63,60 @@ class Parser:
 	def _faster_cky(self, input, unary=False):
 		# Assignment 8
 		raise NotImplementedError
+
+
+class EarleyItem:
+
+	def __init__(self, i, k, head, body=(), dot=0, star=False, dotopt=False):
+		self.i, self.k = i, k
+		self.head, self.body = head, body
+		assert self.i <= self.k, "inadmissible span"
+		self.dot = dot
+		self.star = star
+
+	def __str__(self):
+		body = []
+		for n, X in enumerate(self.body):
+			if n == self.dot: body.append("•")
+			body.append(str(X))
+		if self.dot == len(self.body):
+			body.append("•")
+		body = " ".join(body)
+
+		return f"[{self.i}, {self.k}, {self.head} → {body}]"
+
+	def __repr__(self):
+		return str(self)
+
+	def __eq__(self, other):
+		return isinstance(other, EarleyItem) and \
+			   self.i == other.i and self.k == other.k and \
+			   self.head == other.head and self.body == other.body and \
+			   self.dot == other.dot
+
+	def __hash__(self):
+		return hash((self.i, self.k, self.dot, self.head, self.body))
+
+
+class EarleyParser(Parser):
+
+	def __init__(self, cfg):
+		super().__init__(cfg)
+
+	def _earley(self, input):
+		# Assignment 8, Question 4
+		raise NotImplementedError
+
+	def earley(self, input, strategy="earley"):
+		β = None
+		if strategy == "earley":
+			β = self._earley(input)
+		else:
+			raise NotImplementedError
+
+		total = self.cfg.R.zero
+		for item, w in β.items():
+			if item.end and item.head == S and item.i == 0 and item.k == len(input):
+				total += β[item]
+
+		return total
