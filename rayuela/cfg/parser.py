@@ -37,11 +37,6 @@ class Parser:
 		""" semiring version of CKY  """
 		N = len(input)
 
-		# handle unaries outside of main loops
-
-		W = Pathsum(self.cfg.unary_fsa).lehmann(zero=False)
-		chain = lambda X, Y: W[State(X), State(Y)] if (State(X), State(Y)) in W else self.R.zero
-
 		# initialization
 		β = self.R.chart()
 
@@ -59,14 +54,6 @@ class Parser:
 					for p, w in self.cfg.binary:
 						X, Y, Z = p.head, p.body[0], p.body[1]
 						β[X, i, k] += β[Y, i, j] * β[Z, j, k] * w
-
-				# include unary chains (not part of standard CKY)
-				U = []
-				for X in self.cfg.V:
-					for Y in self.cfg.V:
-						U.append(((Y, i, k), β[(X, i, k)] * chain(X, Y)))
-				for item, w in U:
-					β[item] += w
 
 		return β
 
