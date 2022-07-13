@@ -67,12 +67,12 @@ class Transformer:
         ncfg = cfg.spawn()
         add = ncfg.add
 
-        for (q, w) in cfg.P:
+        for (q, v) in cfg.P:
             if p != q:
-                add(w, q.head, *q.body)
+                add(v, q.head, *q.body)
 
-        for (head, body), w, in self._fold(cfg, p, w, I):
-            add(w, head, *body)
+        for (head, body), v, in self._fold(cfg, p, w, I):
+            add(v, head, *body)
 
         ncfg.make_unary_fsa()
         return ncfg
