@@ -23,27 +23,27 @@ def test_nullary_example():
     R= Tropical
 
     cfg = CFG.from_string(
-		"""
+        """
         A → ε:	1
         A → c:	42
-        A → A A A:	3
-        A → B B A c:	36
-        A → D B ε A:	13
-        A → B D ε ε:	29
-        A → ε ε ε B A:	24
+        A → A A:	3
+        A → B B:	36
+        A → D B:	13
+        A → B D:	29
+        A → ε:	24
         B → c:	42
         B → ε:	22
         B → A B:	26
         B → c B:	13
-        B → A ε B c B:	11
-        B → c A ε c ε:	39
+        B → A ε:	11
+        B → c A:	39
         D → A:	41
         D → c:	24
         D → ε:	0
-        D → D ε A ε:	5
-        D → ε B c B:	3
-        D → B B D B D:	2
-		""".strip(), R)
+        D → D ε:	5
+        D → ε B:	3
+        D → B B:	2
+        """.strip(), R)
 
     cfg_sum = Treesum(cfg).sum()
 
